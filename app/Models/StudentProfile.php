@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\StudentStatus;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -57,6 +58,14 @@ class StudentProfile extends Model
         return [
             'date_of_birth' => 'date',
         ];
+    }
+
+    /**
+     * Get the student status from the associated user account.
+     */
+    public function getStatusAttribute(): StudentStatus
+    {
+        return $this->user?->status ?? StudentStatus::Active;
     }
 
     /**

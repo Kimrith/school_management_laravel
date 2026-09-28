@@ -362,28 +362,8 @@
                 </div>
             </header>
 
-            <!-- Flash Status Messages -->
-            @if (session('success'))
-                <div class="mx-4 sm:mx-6 lg:mx-8 mt-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between text-sm shadow-2xs">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
-                        <span>{{ session('success') }}</span>
-                    </div>
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="mx-4 sm:mx-6 lg:mx-8 mt-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-center justify-between text-sm shadow-2xs">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-5 h-5 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-                        </svg>
-                        <span>{{ session('error') }}</span>
-                    </div>
-                </div>
-            @endif
+            <!-- Floating Toast Notifications Popup -->
+            @include('share.toaste')
 
             <!-- Main Page Content -->
             <main class="flex-1 p-4 sm:p-6 lg:p-8">

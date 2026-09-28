@@ -85,6 +85,71 @@
         </div>
     </div>
 
+<!-- Filter & Sort Toolbar: Exam Selection, Subject Search, and Score Sorting -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-xs grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+        
+        <!-- 1. Select Exam Query Dropdown -->
+        <div>
+            <label for="exam-select" class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Select Exam</label>
+            <div class="relative">
+                <select 
+                    id="exam-select" 
+                    name="exam_filter" 
+                    class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs sm:text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 font-medium transition-all appearance-none pr-10"
+                >
+                    <option value="">All Examinations</option>
+                    <option value="midterm">Midterm Exam (Web Dev)</option>
+                    <option value="final">Final Term Exam (Algorithms)</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Subject Name Search Input -->
+        <div>
+            <label for="subject-search" class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Search Subject</label>
+            <div class="relative">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                </div>
+                <input 
+                    type="text" 
+                    id="subject-search" 
+                    placeholder="e.g. Web Development..." 
+                    class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs sm:text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block pl-9 pr-3 py-2.5 font-medium transition-all placeholder:text-slate-400"
+                >
+            </div>
+        </div>
+
+        <!-- 3. Sort Score Dropdown (High to Low / Low to High) -->
+        <div>
+            <label for="score-sort" class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Sort Score</label>
+            <div class="relative">
+                <select 
+                    id="score-sort" 
+                    name="sort_score" 
+                    class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-xs sm:text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-2.5 font-medium transition-all appearance-none pr-10"
+                >
+                    <option value="">Default Order</option>
+                    <option value="high-to-low">High to Low Score</option>
+                    <option value="low-to-high">Low to High Score</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
     <!-- Main Content: Grades Cards & Weekly Class Schedule -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Recent Exam Grade Cards (2 Cols) -->
