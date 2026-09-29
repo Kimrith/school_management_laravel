@@ -33,6 +33,30 @@
                 {{ $teacher->specialization ?? 'General Academics' }}
             </td>
 
+             <!-- Assigned Classrooms -->
+            <td class="py-4 px-3">
+                @php
+                    $assignedClasses = $teacher->taughtClassrooms->unique('id');
+                @endphp
+                @if($assignedClasses->isNotEmpty())
+                    <div class="flex flex-wrap items-center gap-1.5 max-w-xs">
+                        @foreach($assignedClasses as $cls)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100/80 shadow-2xs">
+                                <svg class="w-3 h-3 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                                {{ $cls->name }}
+                            </span>
+                        @endforeach
+                    </div>
+                @else
+                    <span class="inline-flex items-center gap-1.5 text-xs text-slate-400 italic">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                        No classes assigned
+                    </span>
+                @endif
+            </td>
+
             <!-- Contact -->
             <td class="py-4 px-3">
                 <p class="text-xs font-semibold text-slate-800 font-mono">{{ $teacher->phone ?? 'N/A' }}</p>
@@ -113,7 +137,7 @@
         </tr>
     @empty
         <tr>
-            <td colspan="6" class="py-14 text-center">
+            <td colspan="7" class="py-14 text-center">
                 <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
                     <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mb-3 shadow-xs">
                         👨‍🏫

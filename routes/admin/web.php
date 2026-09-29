@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\ClassController;
+use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\TeacherController;
@@ -41,8 +43,26 @@ Route::get('/teachers/suspended', [TeacherController::class, 'suspended'])->name
 Route::get('/teachers/{teacher}/edit', [TeacherController::class, 'edit'])->name('teachers.edit');
 Route::put('/teachers/{teacher}', [TeacherController::class, 'update'])->name('teachers.update');
 Route::patch('/teachers/{teacher}/toggle-status', [TeacherController::class, 'toggleStatus'])->name('teachers.toggle-status');
-Route::delete('/teachers/{teacher}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
-Route::get('/classes', fn () => view('admin.classes.index'))->name('classes.index');
+// Classes
+Route::get('/classes', [ClassController::class, 'index'])->name('classes.index');
+Route::get('/classes/create', [ClassController::class, 'create'])->name('classes.create');
+Route::post('/classes', [ClassController::class, 'store'])->name('classes.store');
+Route::get('/classes/suspended', [ClassController::class, 'suspended'])->name('classes.suspended');
+Route::get('/classes/{classroom}/edit', [ClassController::class, 'edit'])->name('classes.edit');
+Route::put('/classes/{classroom}', [ClassController::class, 'update'])->name('classes.update');
+Route::patch('/classes/{classroom}/toggle-status', [ClassController::class, 'toggleStatus'])->name('classes.toggle-status');
+Route::delete('/classes/{classroom}', [ClassController::class, 'destroy'])->name('classes.destroy');
+
+// Academic Levels
+Route::get('/levels', [LevelController::class, 'index'])->name('levels.index');
+Route::get('/levels/create', [LevelController::class, 'create'])->name('levels.create');
+Route::post('/levels', [LevelController::class, 'store'])->name('levels.store');
+Route::get('/levels/suspended', [LevelController::class, 'suspended'])->name('levels.suspended');
+Route::get('/levels/{level}/edit', [LevelController::class, 'edit'])->name('levels.edit');
+Route::put('/levels/{level}', [LevelController::class, 'update'])->name('levels.update');
+Route::patch('/levels/{level}/toggle-status', [LevelController::class, 'toggleStatus'])->name('levels.toggle-status');
+Route::delete('/levels/{level}', [LevelController::class, 'destroy'])->name('levels.destroy');
+
 Route::get('/attendances', fn () => view('admin.attendances.index'))->name('attendances.index');
 Route::get('/fees', fn () => view('admin.fees.index'))->name('fees.index');
 
@@ -50,6 +70,6 @@ Route::get('/fees', fn () => view('admin.fees.index'))->name('fees.index');
 Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');
 Route::post('/subjects', [SubjectController::class, 'store'])->name('subjects.store');
 Route::put('/subjects/{subject}', [SubjectController::class, 'update'])->name('subjects.update');
-Route::delete('/subjects/{subject}', [SubjectController::class, 'destroy'])->name('subjects.destroy');
+Route::delete('/subjects/{subject}', [SubjectController::class, 'destroy'])->name('subjects.delete');
 
 Route::get('/exams', fn () => view('admin.exams.index'))->name('exams.index');

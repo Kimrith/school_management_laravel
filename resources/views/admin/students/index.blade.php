@@ -152,6 +152,7 @@
                         <th scope="col" class="py-3.5 pl-6 pr-3">Student Code</th>
                         <th scope="col" class="py-3.5 px-3">Student Name</th>
                         <th scope="col" class="py-3.5 px-3">Classroom</th>
+                        <th scope="col" class="py-3.5 px-3">Level</th>
                         <th scope="col" class="py-3.5 px-3">Gender</th>
                         <th scope="col" class="py-3.5 px-3">Parent Contact</th>
                         <th scope="col" class="py-3.5 px-3">Status</th>

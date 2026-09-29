@@ -23,6 +23,12 @@
                                     {{ $student->classroom->name ?? 'Unassigned' }}
                                 </span>
                             </td>
+                            
+                            <td class="py-4 px-3">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold">
+                                    {{ $student->classroom->level ?? 'Unassigned' }}
+                                </span>
+                            </td>
                             <td class="py-4 px-3 text-xs capitalize font-medium text-slate-600">
                                 {{ $student->gender }}
                             </td>

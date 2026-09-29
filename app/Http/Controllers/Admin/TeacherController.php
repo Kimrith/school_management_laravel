@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\Role;
 use App\Enums\TeacherStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Classroom;
 use App\Models\Subject;
 use App\Models\TeacherProfile;
+use App\Models\TeacherSubject;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -46,8 +48,13 @@ class TeacherController extends Controller
         ];
 
         $subjects = Subject::orderBy('name')->get();
+        if ($subjects->isEmpty()) {
+            TeacherProfile::whereNotNull('specialization')->update(['specialization' => null]);
+        }
 
-        return view('admin.teachers.index', compact('teachers', 'counts', 'statusFilter', 'subjects'));
+        $classrooms = Classroom::orderBy('name')->get();
+
+        return view('admin.teachers.index', compact('teachers', 'counts', 'statusFilter', 'subjects', 'classrooms'));
     }
 
     public function suspended(Request $request)
@@ -89,6 +96,10 @@ class TeacherController extends Controller
             'specialization' => 'nullable|string|max:500',
             'specializations' => 'nullable|array',
             'specializations.*' => 'string|max:255',
+            'classrooms' => 'nullable|array',
+            'classrooms.*' => 'exists:classrooms,id',
+            'classroom_ids' => 'nullable|array',
+            'classroom_ids.*' => 'exists:classrooms,id',
             'address' => 'nullable|string',
         ]);
 
@@ -99,7 +110,9 @@ class TeacherController extends Controller
             $specialization = $validated['specialization'];
         }
 
-        DB::transaction(function () use ($validated, $specialization) {
+        $selectedClassrooms = array_values(array_filter(array_map('intval', (array) ($request->input('classrooms') ?? $request->input('classroom_ids') ?? []))));
+
+        DB::transaction(function () use ($validated, $specialization, $selectedClassrooms) {
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -115,6 +128,22 @@ class TeacherController extends Controller
                 'specialization' => $specialization,
                 'address' => $validated['address'] ?? null,
             ]);
+
+            if (! empty($selectedClassrooms)) {
+                $subjectId = null;
+                if (! empty($validated['specializations'])) {
+                    $firstSubjectName = reset($validated['specializations']);
+                    $subjectId = Subject::where('name', $firstSubjectName)->value('id');
+                }
+
+                foreach ($selectedClassrooms as $classroomId) {
+                    TeacherSubject::firstOrCreate([
+                        'teacher_id' => $user->id,
+                        'classroom_id' => $classroomId,
+                        'subject_id' => $subjectId,
+                    ]);
+                }
+            }
         });
 
         return redirect()->route('admin.teachers.index')->with('success', 'Faculty account and profile created successfully! Default password is: password123');
@@ -124,8 +153,23 @@ class TeacherController extends Controller
     {
         $teacher->load(['user', 'taughtSubjects', 'taughtClassrooms']);
         $subjects = Subject::orderBy('name')->get();
+        $classrooms = Classroom::orderBy('name')->get();
 
-        return view('admin.teachers.edit', compact('teacher', 'subjects'));
+        // If subjects were deleted or changed, clean up orphaned specializations
+        if ($teacher->specialization) {
+            $existingSubjectNames = $subjects->pluck('name')->toArray();
+            $specs = array_filter(array_map('trim', explode(',', (string) $teacher->specialization)));
+            $validSpecs = array_values(array_filter($specs, fn ($s) => in_array($s, $existingSubjectNames, true)));
+
+            if (count($specs) !== count($validSpecs)) {
+                $teacher->update([
+                    'specialization' => ! empty($validSpecs) ? implode(', ', $validSpecs) : null,
+                ]);
+                $teacher->refresh();
+            }
+        }
+
+        return view('admin.teachers.edit', compact('teacher', 'subjects', 'classrooms'));
     }
 
     public function update(Request $request, TeacherProfile $teacher)
@@ -138,6 +182,10 @@ class TeacherController extends Controller
             'specialization' => 'nullable|string|max:500',
             'specializations' => 'nullable|array',
             'specializations.*' => 'string|max:255',
+            'classrooms' => 'nullable|array',
+            'classrooms.*' => 'exists:classrooms,id',
+            'classroom_ids' => 'nullable|array',
+            'classroom_ids.*' => 'exists:classrooms,id',
             'address' => 'nullable|string',
             'status' => 'nullable|in:active,inactive,suspended',
         ]);
@@ -149,7 +197,9 @@ class TeacherController extends Controller
             $specialization = $validated['specialization'];
         }
 
-        DB::transaction(function () use ($validated, $teacher, $specialization) {
+        $selectedClassrooms = array_values(array_filter(array_map('intval', (array) ($request->input('classrooms') ?? $request->input('classroom_ids') ?? []))));
+
+        DB::transaction(function () use ($validated, $teacher, $specialization, $selectedClassrooms) {
             $userUpdates = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -167,6 +217,43 @@ class TeacherController extends Controller
                 'specialization' => $specialization,
                 'address' => $validated['address'] ?? null,
             ]);
+
+            // Sync classroom assignments for this teacher
+            $currentClassroomIds = TeacherSubject::where('teacher_id', $teacher->user_id)
+                ->pluck('classroom_id')
+                ->unique()
+                ->toArray();
+
+            // Classrooms to remove
+            $toRemove = array_diff($currentClassroomIds, $selectedClassrooms);
+            if (! empty($toRemove)) {
+                TeacherSubject::where('teacher_id', $teacher->user_id)
+                    ->whereIn('classroom_id', $toRemove)
+                    ->delete();
+            }
+
+            // Classrooms to add
+            $toAdd = array_diff($selectedClassrooms, $currentClassroomIds);
+            if (! empty($toAdd)) {
+                $subjectId = null;
+                if (! empty($validated['specializations'])) {
+                    $firstSubjectName = reset($validated['specializations']);
+                    $subjectId = Subject::where('name', $firstSubjectName)->value('id');
+                } elseif ($specialization) {
+                    $specs = array_filter(array_map('trim', explode(',', $specialization)));
+                    if (! empty($specs)) {
+                        $subjectId = Subject::where('name', reset($specs))->value('id');
+                    }
+                }
+
+                foreach ($toAdd as $classroomId) {
+                    TeacherSubject::firstOrCreate([
+                        'teacher_id' => $teacher->user_id,
+                        'classroom_id' => $classroomId,
+                        'subject_id' => $subjectId,
+                    ]);
+                }
+            }
         });
 
         return redirect()->route('admin.teachers.index')->with('success', "Faculty member {$teacher->user->name} updated successfully!");

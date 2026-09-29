@@ -114,7 +114,8 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Classroom::class, 'teacher_subjects', 'teacher_id', 'classroom_id')
             ->withPivot(['id', 'subject_id'])
-            ->withTimestamps();
+            ->withTimestamps()
+            ->distinct();
     }
 
     /**

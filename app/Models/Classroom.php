@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
@@ -13,9 +14,15 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string $name
  * @property string $grade_level
+ * @property int|null $level_id
  * @property string $academic_year
+ * @property string|null $room
+ * @property int $capacity
+ * @property string $status
+ * @property string|null $description
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read Level|null $level
  * @property-read Collection<int, StudentProfile> $studentProfiles
  * @property-read Collection<int, Attendance> $attendances
  * @property-read Collection<int, Exam> $exams
@@ -35,8 +42,21 @@ class Classroom extends Model
     protected $fillable = [
         'name',
         'grade_level',
+        'level_id',
         'academic_year',
+        'room',
+        'capacity',
+        'status',
+        'description',
     ];
+
+    /**
+     * Get the academic level that this classroom belongs to.
+     */
+    public function level(): BelongsTo
+    {
+        return $this->belongsTo(Level::class, 'level_id');
+    }
 
     /**
      * Get the student profiles enrolled in this classroom.

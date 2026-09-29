@@ -8,8 +8,82 @@
         $initialToast = ['type' => 'warning', 'title' => 'Warning', 'message' => session('warning')];
     } elseif (session('info')) {
         $initialToast = ['type' => 'info', 'title' => 'Notice', 'message' => session('info')];
+    } elseif (isset($errors) && $errors->any()) {
+        $initialToast = ['type' => 'error', 'title' => 'Validation Error', 'message' => $errors->first()];
     }
 @endphp
+
+<script>
+    function toastNotification() {
+        return {
+            toasts: [],
+            addToast(toast) {
+                const id = Date.now() + Math.random();
+                const newToast = {
+                    id: id,
+                    type: toast.type || 'success',
+                    title: toast.title || (toast.type === 'error' ? 'Error' : 'Success'),
+                    message: toast.message || '',
+                    show: false,
+                    progress: 100
+                };
+                this.toasts.push(newToast);
+
+                // Animate entrance
+                setTimeout(() => {
+                    const item = this.toasts.find(t => t.id === id);
+                    if (item) item.show = true;
+                }, 50);
+
+                // Progress bar & auto dismiss (4.5s)
+                const duration = 4500;
+                const interval = 50;
+                const step = (interval / duration) * 100;
+                const timer = setInterval(() => {
+                    const item = this.toasts.find(t => t.id === id);
+                    if (!item) {
+                        clearInterval(timer);
+                        return;
+                    }
+                    item.progress -= step;
+                    if (item.progress <= 0) {
+                        clearInterval(timer);
+                        this.removeToast(id);
+                    }
+                }, interval);
+            },
+            removeToast(id) {
+                const index = this.toasts.findIndex(t => t.id === id);
+                if (index > -1) {
+                    this.toasts[index].show = false;
+                    setTimeout(() => {
+                        this.toasts = this.toasts.filter(t => t.id !== id);
+                    }, 300);
+                }
+            },
+            init() {
+                @if ($initialToast)
+                    this.addToast(@json($initialToast));
+                @endif
+
+                window.addEventListener('notify', (e) => {
+                    if (e.detail) this.addToast(e.detail);
+                });
+                window.addEventListener('toast', (e) => {
+                    if (e.detail) this.addToast(e.detail);
+                });
+            }
+        };
+    }
+
+    if (window.Alpine) {
+        Alpine.data('toastNotification', toastNotification);
+    } else {
+        document.addEventListener('alpine:init', function() {
+            Alpine.data('toastNotification', toastNotification);
+        });
+    }
+</script>
 
 <!-- Toast Notification Container (Fixed Top-Right Popup) -->
 <div 
@@ -111,79 +185,3 @@
         </div>
     </template>
 </div>
-
-<script>
-    (function() {
-        function registerToastComponent() {
-            if (typeof Alpine === 'undefined') return;
-
-            Alpine.data('toastNotification', function() {
-                return {
-                    toasts: [],
-                    addToast(toast) {
-                        const id = Date.now() + Math.random();
-                        const newToast = {
-                            id: id,
-                            type: toast.type || 'success',
-                            title: toast.title || (toast.type === 'error' ? 'Error' : 'Success'),
-                            message: toast.message || '',
-                            show: false,
-                            progress: 100
-                        };
-                        this.toasts.push(newToast);
-
-                        // Animate entrance
-                        setTimeout(() => {
-                            const item = this.toasts.find(t => t.id === id);
-                            if (item) item.show = true;
-                        }, 50);
-
-                        // Progress bar & auto dismiss (4.5s)
-                        const duration = 4500;
-                        const interval = 50;
-                        const step = (interval / duration) * 100;
-                        const timer = setInterval(() => {
-                            const item = this.toasts.find(t => t.id === id);
-                            if (!item) {
-                                clearInterval(timer);
-                                return;
-                            }
-                            item.progress -= step;
-                            if (item.progress <= 0) {
-                                clearInterval(timer);
-                                this.removeToast(id);
-                            }
-                        }, interval);
-                    },
-                    removeToast(id) {
-                        const index = this.toasts.findIndex(t => t.id === id);
-                        if (index > -1) {
-                            this.toasts[index].show = false;
-                            setTimeout(() => {
-                                this.toasts = this.toasts.filter(t => t.id !== id);
-                            }, 300);
-                        }
-                    },
-                    init() {
-                        @if ($initialToast)
-                            this.addToast(@json($initialToast));
-                        @endif
-
-                        window.addEventListener('notify', (e) => {
-                            if (e.detail) this.addToast(e.detail);
-                        });
-                        window.addEventListener('toast', (e) => {
-                            if (e.detail) this.addToast(e.detail);
-                        });
-                    }
-                };
-            });
-        }
-
-        if (window.Alpine) {
-            registerToastComponent();
-        } else {
-            document.addEventListener('alpine:init', registerToastComponent);
-        }
-    })();
-</script>

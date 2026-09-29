@@ -111,7 +111,7 @@
         </form>
 
         <div class="flex items-center gap-2 text-xs text-slate-500 self-end md:self-auto">
-            <span>Showing <span class="font-semibold text-slate-800">{{ $teachers->count() }}</span> of <span class="font-semibold text-slate-800">{{ $teachers->total() }}</span> faculty members</span>
+            <span>Showing <span class="font-semibold text-slate-800">{{ $teachers->count() }}</span> of <span class="font-semibold text-slate-800">{{ $teachers->total() }}</span> Faculty Members</span>
         </div>
     </div>
 
@@ -124,6 +124,7 @@
                         <th scope="col" class="py-3.5 pl-6 pr-3">Instructor</th>
                         <th scope="col" class="py-3.5 px-3">Qualification</th>
                         <th scope="col" class="py-3.5 px-3">Specialization</th>
+                        <th scope="col" class="py-3.5 px-3">Class</th>
                         <th scope="col" class="py-3.5 px-3">Contact</th>
                         <th scope="col" class="py-3.5 px-3">Status</th>
                         <th scope="col" class="py-3.5 pl-3 pr-6 text-right">Actions</th>

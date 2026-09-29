@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\StudentProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -25,6 +26,17 @@ class PortalViewsTest extends TestCase
 
     public function test_admin_students_view_renders(): void
     {
+        $studentUser = User::create([
+            'name' => 'John Doe',
+            'email' => 'student@school.edu',
+            'password' => bcrypt('password123'),
+        ]);
+        StudentProfile::create([
+            'user_id' => $studentUser->id,
+            'student_code' => 'STU-1001',
+            'gender' => 'male',
+        ]);
+
         $response = $this->actingAs($this->user)->get('/admin/students');
         $response->assertStatus(200);
         $response->assertSee('Students Directory');

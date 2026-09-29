@@ -84,6 +84,6 @@ class TeacherProfile extends Model
             'classroom_id',
             'user_id',
             'id'
-        )->withPivot(['id', 'subject_id'])->withTimestamps();
+        )->withPivot(['id', 'subject_id'])->withTimestamps()->distinct();
     }
 }

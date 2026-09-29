@@ -7,17 +7,20 @@
 <div 
     class="space-y-6" 
     x-data="{ 
-        addSubjectModal: false, 
+        addSubjectModal: {{ $errors->any() ? 'true' : 'false' }}, 
         editSubjectModal: false, 
         deleteSubjectModal: false, 
         searchQuery: '',
         selectedSubject: { 
+            id: '',
             name: '', 
             code: '', 
-            desc: '', 
-            credits: '3',
-            teachers: '', 
-            classes: '' 
+            level_id: '',
+            level_name: '',
+            classroom_ids: [],
+            classroom_id: '',
+            classroom_name: '',
+            desc: ''
         } 
     }"
 >
@@ -25,7 +28,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold tracking-tight text-slate-900">Academic Subjects</h1>
-            <p class="text-sm text-slate-500 mt-1">Manage school curriculum, course syllabi, credits, and faculty allocations.</p>
+            <p class="text-sm text-slate-500 mt-1">Manage school curriculum, course syllabi, classrooms, and subject allocations.</p>
         </div>
         <div class="flex items-center gap-3">
             <button 
@@ -41,12 +44,13 @@
         </div>
     </div>
 
+
     <!-- Quick Stats Row -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
                 <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Subjects</p>
-                <p class="text-2xl font-bold text-slate-900 mt-1">18</p>
+                <p class="text-2xl font-bold text-slate-900 mt-1">{{ count($subjectsList) }}</p>
             </div>
             <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
                 📚
@@ -54,20 +58,20 @@
         </div>
         <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Assigned Faculty</p>
-                <p class="text-2xl font-bold text-slate-900 mt-1">14</p>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Available Classrooms</p>
+                <p class="text-2xl font-bold text-slate-900 mt-1">{{ count($classrooms) }}</p>
             </div>
             <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">
-                👨‍🏫
+                🏫
             </div>
         </div>
         <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Semesters</p>
-                <p class="text-2xl font-bold text-slate-900 mt-1">2</p>
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Curriculum Status</p>
+                <p class="text-2xl font-bold text-slate-900 mt-1">Active</p>
             </div>
             <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg">
-                🗓️
+                ✓
             </div>
         </div>
     </div>
