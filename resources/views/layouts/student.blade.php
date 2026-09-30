@@ -25,6 +25,9 @@
     @stack('styles')
 </head>
 <body class="h-full antialiased text-slate-800" x-data="{ sidebarOpen: false }">
+    <!-- Global Page & Database Query Preloader -->
+    @include('share.loading')
+
     <div class="min-h-full flex flex-col">
         <div 
             x-show="sidebarOpen" 

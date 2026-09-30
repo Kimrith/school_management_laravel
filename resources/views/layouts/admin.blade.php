@@ -30,6 +30,9 @@
     @stack('styles')
 </head>
 <body class="h-full antialiased text-slate-800" x-data="{ sidebarOpen: false, userDropdown: false, notificationsOpen: false }">
+    <!-- Global Page & Database Query Preloader -->
+    @include('share.loading')
+
     <div class="min-h-full flex flex-col">
         <!-- Mobile Sidebar Overlay Backdrop -->
         <div 

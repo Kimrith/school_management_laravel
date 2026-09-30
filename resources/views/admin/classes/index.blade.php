@@ -210,8 +210,8 @@
         </div>
     </div>
 
-    <!-- Classrooms Grid (Query Component) -->
-    @include('admin.classes.query')
+    <!-- Classrooms Grid (Table Component) -->
+    @include('admin.classes.table')
 
     <!-- Add Classroom Modal -->
     @include('admin.classes.insert')

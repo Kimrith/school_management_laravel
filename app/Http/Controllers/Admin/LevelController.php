@@ -41,7 +41,7 @@ class LevelController extends Controller
             $query->where('name', 'like', "%{$search}%");
         }
 
-        $levels = $query->orderBy('name')->paginate(10)->withQueryString();
+        $levels = $query->orderBy('name')->paginate(7)->withQueryString();
 
         $counts = [
             'all' => Level::count(),
@@ -119,7 +119,7 @@ class LevelController extends Controller
             $query->where('name', 'like', "%{$search}%");
         }
 
-        $levels = $query->orderBy('name')->paginate(10)->withQueryString();
+        $levels = $query->orderBy('name')->paginate(7)->withQueryString();
         $activeCount = Level::whereRaw('LOWER(status) = ?', ['active'])->count();
         $suspendedCount = Level::whereRaw('LOWER(status) IN (?, ?)', ['suspended', 'inactive'])->count();
 

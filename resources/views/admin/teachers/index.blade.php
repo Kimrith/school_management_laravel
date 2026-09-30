@@ -131,7 +131,7 @@
                     </tr>
                 </thead>
 
-                @include('admin.teachers.query')
+                @include('admin.teachers.table')
             </table>
         </div>
 

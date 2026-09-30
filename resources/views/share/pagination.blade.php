@@ -1,5 +1,5 @@
 @php
-    $paginator = $paginator ?? $items ?? $students ?? null;
+    $paginator = $paginator ?? $items ?? $students ?? $invoices ?? $classrooms ?? $teachers ?? $subjects ?? $levels ?? null;
 @endphp
 
 @if ($paginator && $paginator->total() > 0)
@@ -15,9 +15,9 @@
             entries
         </p>
 
-        <!-- Minimal Pagination Controls -->
-        @if ($paginator->hasPages())
-            <nav role="navigation" aria-label="Pagination Navigation" class="flex items-center gap-1">
+        <!-- Pagination Controls -->
+        <nav role="navigation" aria-label="Pagination Navigation" class="flex items-center gap-1">
+            @if ($paginator->hasPages())
                 {{-- Previous Page Button --}}
                 @if ($paginator->onFirstPage())
                     <span 
@@ -88,7 +88,33 @@
                         </svg>
                     </span>
                 @endif
-            </nav>
-        @endif
+            @else
+                {{-- Visible Controls for Single Page (Always show navigation controls) --}}
+                <span 
+                    aria-disabled="true" 
+                    class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 bg-slate-50/80 border border-slate-200/50 cursor-not-allowed"
+                    title="Previous page"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                    </svg>
+                </span>
+                <span 
+                    aria-current="page" 
+                    class="min-w-[32px] h-8 px-2.5 rounded-lg flex items-center justify-center font-semibold text-xs text-white bg-slate-900 shadow-2xs select-none"
+                >
+                    1
+                </span>
+                <span 
+                    aria-disabled="true" 
+                    class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 bg-slate-50/80 border border-slate-200/50 cursor-not-allowed"
+                    title="Next page"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                    </svg>
+                </span>
+            @endif
+        </nav>
     </div>
 @endif

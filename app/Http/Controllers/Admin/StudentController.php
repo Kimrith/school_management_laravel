@@ -18,7 +18,7 @@ class StudentController extends Controller
     {
         $statusFilter = $request->query('status', 'all');
 
-        $query = StudentProfile::with(['user', 'classroom']);
+        $query = StudentProfile::with(['user', 'classroom.level']);
 
         if ($statusFilter !== 'all' && in_array($statusFilter, StudentStatus::values(), true)) {
             $query->whereHas('user', function ($q) use ($statusFilter) {
@@ -56,7 +56,7 @@ class StudentController extends Controller
 
     public function suspended(Request $request)
     {
-        $query = StudentProfile::with(['user', 'classroom'])
+        $query = StudentProfile::with(['user', 'classroom.level'])
             ->whereHas('user', function ($q) {
                 $q->where('status', StudentStatus::Suspended->value);
             });

@@ -244,14 +244,7 @@
         </div>
 
         <!-- Pagination Footer -->
-        @if($students->hasPages())
-            <div class="p-4 px-6 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-                <p>Showing {{ $students->firstItem() }} to {{ $students->lastItem() }} of {{ $students->total() }} entries</p>
-                <div>
-                    {{ $students->links() }}
-                </div>
-            </div>
-        @endif
+        @include('share.pagination', ['paginator' => $students])
     </div>
 </div>
 @endsection

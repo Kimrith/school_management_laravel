@@ -1,27 +1,15 @@
 <?php
 
 use App\Http\Controllers\Admin\ClassController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FeeController;
 use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\TeacherController;
-use App\Models\Classroom;
-use App\Models\StudentProfile;
-use App\Models\TeacherProfile;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/dashboard', function () {
-    $totalStudents = StudentProfile::count();
-    $totalTeachers = TeacherProfile::count();
-    $totalClassrooms = Classroom::count();
-
-    return view('admin.dashboard', [
-        'totalStudents' => $totalStudents > 0 ? $totalStudents : 1284,
-        'totalTeachers' => $totalTeachers > 0 ? $totalTeachers : 86,
-        'totalClassrooms' => $totalClassrooms > 0 ? $totalClassrooms : 34,
-        'attendanceRate' => '96.8%',
-    ]);
-})->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 // Students
 Route::get('/students', [StudentController::class, 'index'])->name('students.index');
@@ -43,6 +31,8 @@ Route::get('/teachers/suspended', [TeacherController::class, 'suspended'])->name
 Route::get('/teachers/{teacher}/edit', [TeacherController::class, 'edit'])->name('teachers.edit');
 Route::put('/teachers/{teacher}', [TeacherController::class, 'update'])->name('teachers.update');
 Route::patch('/teachers/{teacher}/toggle-status', [TeacherController::class, 'toggleStatus'])->name('teachers.toggle-status');
+Route::delete('/teachers/{teacher}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
+
 // Classes
 Route::get('/classes', [ClassController::class, 'index'])->name('classes.index');
 Route::get('/classes/create', [ClassController::class, 'create'])->name('classes.create');
@@ -64,7 +54,9 @@ Route::patch('/levels/{level}/toggle-status', [LevelController::class, 'toggleSt
 Route::delete('/levels/{level}', [LevelController::class, 'destroy'])->name('levels.destroy');
 
 Route::get('/attendances', fn () => view('admin.attendances.index'))->name('attendances.index');
-Route::get('/fees', fn () => view('admin.fees.index'))->name('fees.index');
+Route::get('/fees', [FeeController::class, 'index'])->name('fees.index');
+Route::post('/fees', [FeeController::class, 'store'])->name('fees.store');
+Route::patch('/fees/{fee}/status', [FeeController::class, 'updateStatus'])->name('fees.update-status');
 
 // Subjects
 Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');

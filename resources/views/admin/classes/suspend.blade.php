@@ -183,11 +183,10 @@
             @endforeach
         </div>
 
-        @if($classrooms->hasPages())
-            <div class="mt-6">
-                {{ $classrooms->links() }}
-            </div>
-        @endif
+        <!-- Pagination -->
+        <div class="mt-6 bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            @include('share.pagination', ['paginator' => $classrooms])
+        </div>
     @else
         <!-- Empty State -->
         <div class="bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-xs max-w-lg mx-auto">

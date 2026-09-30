@@ -160,7 +160,7 @@
                     </tr>
                 </thead>
 
-                @include('admin.students.query')
+                @include('admin.students.table')
             </table>
         </div>
 

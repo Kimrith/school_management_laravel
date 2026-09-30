@@ -178,8 +178,8 @@
         </div>
     </div>
 
-    <!-- Levels Grid (Query Component) -->
-    @include('admin.level.query')
+    <!-- Levels Grid (Table Component) -->
+    @include('admin.level.table')
 
     <!-- Add Level Modal -->
     @include('admin.level.insert')

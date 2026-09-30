@@ -41,7 +41,7 @@ class ClassController extends Controller
             $query->where('grade_level', $request->grade);
         }
 
-        $classrooms = $query->orderBy('name')->paginate(9)->withQueryString();
+        $classrooms = $query->orderBy('name')->paginate(7)->withQueryString();
 
         $allClassrooms = Classroom::withCount('studentProfiles')->get();
         $totalCapacity = $allClassrooms->sum('capacity') ?: 1;
@@ -189,7 +189,7 @@ class ClassController extends Controller
             });
         }
 
-        $classrooms = $query->orderBy('name')->paginate(9)->withQueryString();
+        $classrooms = $query->orderBy('name')->paginate(7)->withQueryString();
         $activeCount = Classroom::where('status', '!=', 'suspended')->count();
         $suspendedCount = Classroom::where('status', 'suspended')->count();
 

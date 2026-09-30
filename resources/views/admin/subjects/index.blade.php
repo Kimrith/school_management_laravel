@@ -97,8 +97,8 @@
         </div>
     </div>
 
-    <!-- Subjects Grid (Query Component) -->
-    @include('admin.subjects.query')
+    <!-- Subjects Grid (Table Component) -->
+    @include('admin.subjects.table')
 
     <!-- Modals (Add, Edit, Delete) -->
     @include('admin.subjects.insert')
