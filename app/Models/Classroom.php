@@ -67,6 +67,14 @@ class Classroom extends Model
     }
 
     /**
+     * Alias for studentProfiles relation.
+     */
+    public function students(): HasMany
+    {
+        return $this->studentProfiles();
+    }
+
+    /**
      * Get the attendances recorded for this classroom.
      */
     public function attendances(): HasMany

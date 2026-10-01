@@ -104,10 +104,6 @@
                     <span>Submit Exam Grades</span>
                     <span class="text-emerald-600">&rarr;</span>
                 </a>
-                <a href="{{ url('/admin/dashboard') }}" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-100 text-xs font-semibold text-slate-800 transition-colors">
-                    <span>Switch to Admin Portal</span>
-                    <span class="text-indigo-600">&rarr;</span>
-                </a>
             </div>
         </div>
     </div>

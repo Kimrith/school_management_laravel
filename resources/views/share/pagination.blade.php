@@ -1,5 +1,5 @@
 @php
-    $paginator = $paginator ?? $items ?? $students ?? $invoices ?? $classrooms ?? $teachers ?? $subjects ?? $levels ?? null;
+    $paginator = $paginator ?? $items ?? $students ?? $invoices ?? $classrooms ?? $teachers ?? $subjects ?? $levels ?? $attendances ?? null;
 @endphp
 
 @if ($paginator && $paginator->total() > 0)

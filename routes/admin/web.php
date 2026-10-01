@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ClassController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExamController;
@@ -54,7 +55,7 @@ Route::put('/levels/{level}', [LevelController::class, 'update'])->name('levels.
 Route::patch('/levels/{level}/toggle-status', [LevelController::class, 'toggleStatus'])->name('levels.toggle-status');
 Route::delete('/levels/{level}', [LevelController::class, 'destroy'])->name('levels.destroy');
 
-Route::get('/attendances', fn () => view('admin.attendances.index'))->name('attendances.index');
+Route::get('/attendances', [AttendanceController::class, 'index'])->name('attendances.index');
 Route::get('/fees', [FeeController::class, 'index'])->name('fees.index');
 Route::post('/fees', [FeeController::class, 'store'])->name('fees.store');
 Route::patch('/fees/{fee}/status', [FeeController::class, 'updateStatus'])->name('fees.update-status');
