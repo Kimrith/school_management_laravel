@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ClassController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\Admin\FeeController;
 use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\StudentController;
@@ -64,4 +65,5 @@ Route::post('/subjects', [SubjectController::class, 'store'])->name('subjects.st
 Route::put('/subjects/{subject}', [SubjectController::class, 'update'])->name('subjects.update');
 Route::delete('/subjects/{subject}', [SubjectController::class, 'destroy'])->name('subjects.delete');
 
-Route::get('/exams', fn () => view('admin.exams.index'))->name('exams.index');
+Route::get('/exams', [ExamController::class, 'index'])->name('exams.index');
+Route::post('/exams', [ExamController::class, 'store'])->name('exams.store');

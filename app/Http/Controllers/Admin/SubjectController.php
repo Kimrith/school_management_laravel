@@ -14,12 +14,25 @@ use Illuminate\Http\Request;
 
 class SubjectController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $classrooms = Classroom::orderBy('name')->get();
         $levels = Level::whereRaw('LOWER(status) = ?', ['active'])->orderBy('name')->get();
 
-        $subjectsList = Subject::with(['level', 'classrooms'])->latest()->get()->map(function ($subject) {
+        $query = Subject::with(['level', 'classrooms'])->latest();
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->trim();
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $subjects = $query->paginate(6)->withQueryString();
+
+        $subjectsList = $subjects->through(function ($subject) {
             $classroomsList = $subject->classrooms->unique('id');
             $firstClassroom = $classroomsList->first();
 
@@ -38,7 +51,7 @@ class SubjectController extends Controller
             ];
         });
 
-        return view('admin.subjects.index', compact('subjectsList', 'classrooms', 'levels'));
+        return view('admin.subjects.index', compact('subjects', 'subjectsList', 'classrooms', 'levels'));
     }
 
     public function create()

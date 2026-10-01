@@ -50,7 +50,7 @@
         <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
                 <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Subjects</p>
-                <p class="text-2xl font-bold text-slate-900 mt-1">{{ count($subjectsList) }}</p>
+                <p class="text-2xl font-bold text-slate-900 mt-1">{{ $subjects->total() }}</p>
             </div>
             <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg">
                 📚
@@ -93,7 +93,7 @@
         </div>
 
         <div class="flex items-center gap-2 text-xs text-slate-500 self-end sm:self-auto">
-            <span>Showing active curriculum subjects</span>
+            <span>Showing <span class="font-semibold text-slate-800">{{ $subjects->count() }}</span> of <span class="font-semibold text-slate-800">{{ $subjects->total() }}</span> curriculum subjects</span>
         </div>
     </div>
 

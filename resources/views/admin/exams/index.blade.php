@@ -4,7 +4,7 @@
 @section('page_title', 'Exams & Marks')
 
 @section('content')
-<div class="space-y-6" x-data="{ addExamModal: false }">
+<div class="space-y-6" x-data="{ addExamModal: {{ $errors->any() ? 'true' : 'false' }} }">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -25,23 +25,78 @@
         </div>
     </div>
 
+    <!-- Success Message Alert -->
+    @if(session('success'))
+        <div class="p-4 text-xs font-semibold text-emerald-700 bg-emerald-50 rounded-xl border border-emerald-200">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <!-- Error Messages Alert -->
+    @if($errors->any())
+        <div class="p-4 text-xs font-semibold text-rose-700 bg-rose-50 rounded-xl border border-rose-200">
+            <ul class="list-disc list-inside space-y-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <!-- Exams Data Table Card -->
     <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
         <div class="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100">
-            <div class="flex items-center gap-3">
-                <input 
-                    type="text" 
-                    placeholder="Search exam title..." 
-                    class="w-full sm:w-64 pl-3.5 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none"
+            <form method="GET" action="{{ route('admin.exams.index') }}" class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                <!-- Search Input -->
+                <div class="relative w-full sm:w-64">
+                    <input 
+                        type="text" 
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Search exam, subject..." 
+                        class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    >
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Classroom Select Filter -->
+                <select 
+                    name="classroom_id" 
+                    onchange="this.form.submit()"
+                    class="py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-700 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                 >
-                <select class="py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-700">
                     <option value="">All Classrooms</option>
-                    <option value="10-A">Grade 10-A</option>
-                    <option value="11-B">Grade 11-B</option>
-                    <option value="12-A">Grade 12-A</option>
+                    @foreach($classrooms as $classroom)
+                        <option value="{{ $classroom->id }}" {{ request('classroom_id') == $classroom->id ? 'selected' : '' }}>
+                            {{ $classroom->name }}
+                        </option>
+                    @endforeach
                 </select>
-            </div>
-            <p class="text-xs text-slate-400">Current Semester Exams</p>
+
+                <button 
+                    type="submit" 
+                    class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
+                >
+                    Filter
+                </button>
+
+                @if(request()->filled('search') || request()->filled('classroom_id'))
+                    <a 
+                        href="{{ route('admin.exams.index') }}" 
+                        class="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline"
+                    >
+                        Clear
+                    </a>
+                @endif
+            </form>
+
+            <p class="text-xs text-slate-400 self-end sm:self-auto">
+                Showing <span class="font-semibold text-slate-700">{{ $exams->total() }}</span> scheduled {{ Str::plural('exam', $exams->total()) }}
+            </p>
         </div>
 
         <div class="overflow-x-auto">
@@ -56,104 +111,17 @@
                         <th scope="col" class="py-3.5 pl-3 pr-6 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-sm">
-                    @php
-                        $exams = [
-                            ['title' => 'Web Development Midterm Examination', 'subject' => 'Web Development (WEB401)', 'class' => 'Grade 10-A', 'date' => 'Oct 15, 2026', 'marks' => '100.00', 'status' => 'scheduled'],
-                            ['title' => 'Advanced Calculus Midterm Assessment', 'subject' => 'Mathematics & Logic (MATH101)', 'class' => 'Grade 11-B', 'date' => 'Oct 22, 2026', 'marks' => '100.00', 'status' => 'scheduled'],
-                            ['title' => 'Database SQL Practical Exam', 'subject' => 'Database Systems (DBS301)', 'class' => 'Grade 12-A', 'date' => 'Nov 05, 2026', 'marks' => '100.00', 'status' => 'upcoming'],
-                            ['title' => 'Technical English Communications Presentation', 'subject' => 'English Communications (ENG201)', 'class' => 'Grade 10-A', 'date' => 'Nov 12, 2026', 'marks' => '50.00', 'status' => 'upcoming'],
-                        ];
-                    @endphp
 
-                    @foreach($exams as $exam)
-                        <tr class="hover:bg-slate-50/60 transition-colors">
-                            <td class="py-4 pl-6 pr-3">
-                                <p class="font-semibold text-slate-900 leading-snug">{{ $exam['title'] }}</p>
-                                <span class="inline-flex items-center gap-1.5 text-xs text-indigo-600 font-medium">Standard Written Exam</span>
-                            </td>
-                            <td class="py-4 px-3 text-xs text-slate-700 font-medium">
-                                {{ $exam['subject'] }}
-                            </td>
-                            <td class="py-4 px-3">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-xs font-medium">
-                                    {{ $exam['class'] }}
-                                </span>
-                            </td>
-                            <td class="py-4 px-3 font-mono text-xs text-slate-600">
-                                {{ $exam['date'] }}
-                            </td>
-                            <td class="py-4 px-3 font-mono font-semibold text-slate-900 text-xs">
-                                {{ $exam['marks'] }} Marks
-                            </td>
-                            <td class="py-4 pl-3 pr-6 text-right">
-                                <div class="inline-flex items-center gap-2">
-                                    <a 
-                                        href="{{ url('/teacher/grades') }}" 
-                                        class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline"
-                                    >
-                                        Marks Sheet &rarr;
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
+                @include('admin.exams.table')
+
             </table>
         </div>
+
+        <!-- Pagination Footer -->
+        @include('share.pagination', ['paginator' => $exams])
     </div>
 
-    <!-- Schedule Exam Modal -->
-    <div x-show="addExamModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="min-h-screen px-4 text-center flex items-center justify-center">
-            <div x-show="addExamModal" @click="addExamModal = false" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs"></div>
-            <div x-show="addExamModal" class="relative bg-white rounded-2xl max-w-md w-full p-6 text-left shadow-xl border border-slate-200/80 my-8 z-10">
-                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <h3 class="text-lg font-bold text-slate-900">Schedule Examination</h3>
-                    <button @click="addExamModal = false" class="p-1 text-slate-400 hover:text-slate-600">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                <form action="#" class="mt-4 space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Exam Title</label>
-                        <input type="text" placeholder="e.g. Midterm Examination" class="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Subject</label>
-                        <select class="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none">
-                            <option>Web Application Development (WEB401)</option>
-                            <option>Discrete Mathematics & Logic (MATH101)</option>
-                            <option>Relational Database Systems (DBS301)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Classroom</label>
-                        <select class="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none">
-                            <option>Grade 10-A</option>
-                            <option>Grade 11-B</option>
-                            <option>Grade 12-A</option>
-                        </select>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Exam Date</label>
-                            <input type="date" class="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Total Marks</label>
-                            <input type="number" value="100.00" class="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none font-mono">
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
-                        <button type="button" @click="addExamModal = false" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 rounded-xl border border-slate-200">Cancel</button>
-                        <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm">Schedule Exam</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Modal Component -->
+    @include('admin.exams.insert')
 </div>
 @endsection
