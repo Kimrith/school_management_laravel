@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -116,5 +117,21 @@ class Classroom extends Model
         return $this->belongsToMany(Subject::class, 'teacher_subjects', 'classroom_id', 'subject_id')
             ->withPivot(['id', 'teacher_id'])
             ->withTimestamps();
+    }
+
+    /**
+     * Scope a query to only include classrooms assigned to the given teacher.
+     */
+    public function scopeForTeacher(Builder $query, User|int|null $teacher): Builder
+    {
+        if ($teacher === null) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        $teacherId = $teacher instanceof User ? $teacher->id : $teacher;
+
+        return $query->whereHas('teachers', function (Builder $q) use ($teacherId) {
+            $q->where('users.id', $teacherId);
+        });
     }
 }

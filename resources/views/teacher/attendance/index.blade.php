@@ -16,7 +16,11 @@
     },
     onFilterChange() {
         const url = new URL(window.location.href);
-        url.searchParams.set('classroom_id', this.selectedClassId);
+        if (this.selectedClassId) {
+            url.searchParams.set('classroom_id', this.selectedClassId);
+        } else {
+            url.searchParams.delete('classroom_id');
+        }
         url.searchParams.set('date', this.attendanceDate);
         window.location.href = url.toString();
     }
@@ -59,6 +63,23 @@
         </div>
     @endif
 
+    {{-- No Assigned Classrooms Warning --}}
+    @if($classrooms->isEmpty())
+        <div class="p-5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-4 text-amber-900 shadow-xs">
+            <div class="p-2 bg-amber-100 rounded-xl text-amber-700 shrink-0 mt-0.5">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-sm text-amber-900">No Assigned Classrooms</h3>
+                <p class="text-xs text-amber-700 mt-1 leading-relaxed">
+                    You currently have no classrooms assigned to your teacher account. Attendance recording is restricted to assigned classes only. Please contact your school administrator to assign classes to your account.
+                </p>
+            </div>
+        </div>
+    @endif
+
     <!-- Header & Class/Date Filter Card -->
     <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -73,14 +94,15 @@
                 <select 
                     x-model="selectedClassId" 
                     @change="onFilterChange()"
-                    class="py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 font-medium focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
+                    :disabled="{{ $classrooms->isEmpty() ? 'true' : 'false' }}"
+                    class="py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 font-medium focus:ring-2 focus:ring-emerald-500/20 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                     @forelse($classrooms as $classroom)
                         <option value="{{ $classroom->id }}" {{ $selectedClassroomId == $classroom->id ? 'selected' : '' }}>
                             {{ $classroom->name }} ({{ $classroom->studentProfiles->count() }} students)
                         </option>
                     @empty
-                        <option value="">No classrooms available</option>
+                        <option value="">No assigned classrooms</option>
                     @endforelse
                 </select>
             </div>

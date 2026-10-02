@@ -32,13 +32,19 @@
         </div>
     </div>
 
+@php
+    $assignedClassrooms = $assignedClassrooms ?? (auth()->user()?->taughtClassrooms?->unique('id') ?? collect());
+    $totalStudents = $totalStudents ?? ($assignedClassrooms->isNotEmpty() ? \App\Models\StudentProfile::whereIn('classroom_id', $assignedClassrooms->pluck('id'))->count() : 0);
+    $teacherSubjects = $teacherSubjects ?? (auth()->user() ? \App\Models\TeacherSubject::with(['classroom.studentProfiles', 'subject'])->where('teacher_id', auth()->id())->get() : collect());
+@endphp
+
     <!-- Teaching Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
                 <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Assigned Classes</p>
-                <p class="text-2xl font-bold text-slate-900 mt-1 font-mono">2 Classes</p>
-                <span class="text-xs text-emerald-600 mt-1">Grade 10-A, Grade 12-A</span>
+                <p class="text-2xl font-bold text-slate-900 mt-1 font-mono">{{ $assignedClassrooms->count() }} {{ \Illuminate\Support\Str::plural('Class', $assignedClassrooms->count()) }}</p>
+                <span class="text-xs text-emerald-600 mt-1 truncate block max-w-xs">{{ $assignedClassrooms->pluck('name')->join(', ') ?: 'No classrooms assigned' }}</span>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
                 🏫
@@ -48,8 +54,8 @@
         <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
                 <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Students</p>
-                <p class="text-2xl font-bold text-indigo-600 mt-1 font-mono">78 Students</p>
-                <span class="text-xs text-slate-400 mt-1">Under direct instruction</span>
+                <p class="text-2xl font-bold text-indigo-600 mt-1 font-mono">{{ $totalStudents }} Students</p>
+                <span class="text-xs text-slate-400 mt-1">{{ $totalStudents > 0 ? 'Under direct instruction' : 'No students assigned yet' }}</span>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
                 👨‍🎓
@@ -59,7 +65,7 @@
         <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
                 <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pending Grading</p>
-                <p class="text-2xl font-bold text-amber-600 mt-1 font-mono">1 Assessment</p>
+                <p class="text-2xl font-bold text-amber-600 mt-1 font-mono">0 Assessments</p>
                 <a href="{{ url('/teacher/grades') }}" class="text-xs text-indigo-600 font-semibold hover:underline mt-1">Grade now &rarr;</a>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-bold">
@@ -73,23 +79,24 @@
         <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6">
             <h2 class="text-base font-bold text-slate-900 mb-4">My Weekly Teaching Timetable</h2>
             <div class="space-y-3">
-                <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs font-mono font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">Mon &bull; 08:00 AM - 09:30 AM</span>
-                        <h3 class="text-sm font-bold text-slate-900 mt-1.5">Web Application Development (WEB401)</h3>
-                        <p class="text-xs text-slate-400">Room 302 &bull; Grade 10-A (38 Students)</p>
+                @forelse($teacherSubjects as $assignment)
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-mono font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">Weekly Class</span>
+                            <h3 class="text-sm font-bold text-slate-900 mt-1.5">{{ $assignment->subject?->name ?? 'Teaching Subject' }} ({{ $assignment->subject?->code ?? 'SUB' }})</h3>
+                            <p class="text-xs text-slate-400">{{ $assignment->classroom?->name ?? 'Classroom' }} ({{ $assignment->classroom?->studentProfiles?->count() ?? 0 }} Students)</p>
+                        </div>
+                        <a href="{{ route('teacher.attendance.index', ['classroom_id' => $assignment->classroom_id]) }}" class="px-3 py-1.5 bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg shadow-2xs">Attendance</a>
                     </div>
-                    <a href="{{ url('/teacher/attendance') }}" class="px-3 py-1.5 bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg shadow-2xs">Attendance</a>
-                </div>
-
-                <div class="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs font-mono font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">Wed &bull; 10:00 AM - 11:30 AM</span>
-                        <h3 class="text-sm font-bold text-slate-900 mt-1.5">Relational Database Systems (DBS301)</h3>
-                        <p class="text-xs text-slate-400">Room 402 &bull; Grade 12-A (40 Students)</p>
+                @empty
+                    <div class="py-8 text-center text-slate-400">
+                        <div class="w-10 h-10 mx-auto rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                            🏫
+                        </div>
+                        <p class="text-sm font-medium text-slate-600">No classes currently assigned</p>
+                        <p class="text-xs text-slate-400 mt-0.5">When the administration assigns classrooms to your account, they will appear here.</p>
                     </div>
-                    <a href="{{ url('/teacher/attendance') }}" class="px-3 py-1.5 bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-lg shadow-2xs">Attendance</a>
-                </div>
+                @endforelse
             </div>
         </div>
 

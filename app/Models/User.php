@@ -133,4 +133,16 @@ class User extends Authenticatable
     {
         return $this->teacherProfile !== null;
     }
+
+    /**
+     * Determine if the user teaches the given classroom.
+     */
+    public function teachesClassroom(Classroom|int $classroom): bool
+    {
+        $classroomId = $classroom instanceof Classroom ? $classroom->id : $classroom;
+
+        return TeacherSubject::where('teacher_id', $this->id)
+            ->where('classroom_id', $classroomId)
+            ->exists();
+    }
 }

@@ -23,12 +23,12 @@ class ProfileController extends Controller
         /** @var TeacherProfile|null $teacher */
         $teacher = $user?->teacherProfile;
 
-        // If the logged-in user doesn't have a teacher profile record yet, attempt to find first or instantiate
-        if (! $teacher) {
-            $teacher = TeacherProfile::with(['user', 'taughtSubjects', 'taughtClassrooms', 'teacherSubjects.subject', 'teacherSubjects.classroom'])->first();
-        } else {
-            $teacher->loadMissing(['user', 'taughtSubjects', 'taughtClassrooms', 'teacherSubjects.subject', 'teacherSubjects.classroom']);
+        // Ensure teacher profile belongs strictly to the authenticated user
+        if (! $teacher && $user) {
+            $teacher = TeacherProfile::firstOrCreate(['user_id' => $user->id]);
         }
+
+        $teacher?->loadMissing(['user', 'taughtSubjects', 'taughtClassrooms', 'teacherSubjects.subject', 'teacherSubjects.classroom']);
 
         // Active classrooms assigned to this teacher
         $assignedClassrooms = $teacher?->taughtClassrooms?->unique('id') ?? collect();
@@ -38,7 +38,7 @@ class ProfileController extends Controller
         $classroomIds = $assignedClassrooms->pluck('id')->filter()->all();
         $totalStudents = ! empty($classroomIds)
             ? StudentProfile::whereIn('classroom_id', $classroomIds)->count()
-            : 78; // Fallback demo number for rich display if classes are empty
+            : 0;
 
         return view('teacher.profile.index', [
             'teacher' => $teacher,

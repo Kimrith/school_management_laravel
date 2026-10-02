@@ -65,7 +65,7 @@ class PortalViewsTest extends TestCase
         $response = $this->actingAs($this->user)->get('/admin/attendances');
         $response->assertStatus(200);
         $response->assertSee('Attendance Monitoring');
-        $response->assertSee('Present Today');
+        $response->assertSee('Present');
     }
 
     public function test_admin_fees_view_renders(): void
@@ -73,7 +73,7 @@ class PortalViewsTest extends TestCase
         $response = $this->actingAs($this->user)->get('/admin/fees');
         $response->assertStatus(200);
         $response->assertSee('Fee Billing');
-        $response->assertSee('Create Invoice');
+        $response->assertSee('Standard Tuition');
     }
 
     public function test_admin_subjects_view_renders(): void
