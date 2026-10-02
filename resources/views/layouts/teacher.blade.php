@@ -103,8 +103,16 @@
                         <span>Exam Grades</span>
                     </a>
 
-                    <a href="">
-                        Profile
+                    <!-- Profile -->
+                    @php $isProfile = request()->is('teacher/profile*'); @endphp
+                    <a 
+                        href="{{ route('teacher.profile.index') }}" 
+                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 {{ $isProfile ? 'bg-emerald-50 text-emerald-700 shadow-xs' : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900' }}"
+                    >
+                        <svg class="w-5 h-5 {{ $isProfile ? 'text-emerald-600' : 'text-slate-400' }}" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                        </svg>
+                        <span>Faculty Profile</span>
                     </a>
                 </nav>
             </div>
@@ -112,15 +120,15 @@
             <!-- Current Faculty Profile -->
             <div class="p-4 border-t border-slate-100">
                 <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/60">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-9 h-9 rounded-lg bg-emerald-600 text-white font-semibold text-sm flex items-center justify-center shrink-0">
+                    <a href="{{ route('teacher.profile.index') }}" class="flex items-center gap-3 min-w-0 group">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-600 group-hover:bg-emerald-700 text-white font-semibold text-sm flex items-center justify-center shrink-0 transition-colors">
                             {{ strtoupper(substr(auth()->user()->name ?? 'Prof', 0, 2)) }}
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="text-sm font-semibold text-slate-800 truncate">{{ auth()->user()->name ?? 'Faculty Member' }}</p>
+                            <p class="text-sm font-semibold text-slate-800 group-hover:text-emerald-700 truncate transition-colors">{{ auth()->user()->name ?? 'Faculty Member' }}</p>
                             <p class="text-xs text-slate-400 truncate">Teacher Portal</p>
                         </div>
-                    </div>
+                    </a>
 
                     <form method="POST" action="{{ Route::has('logout') ? route('logout') : url('/logout') }}">
                         @csrf
