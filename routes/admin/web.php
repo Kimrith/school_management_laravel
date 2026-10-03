@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\Admin\FeeController;
 use App\Http\Controllers\Admin\LevelController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\Admin\TeacherController;
@@ -68,3 +69,8 @@ Route::delete('/subjects/{subject}', [SubjectController::class, 'destroy'])->nam
 
 Route::get('/exams', [ExamController::class, 'index'])->name('exams.index');
 Route::post('/exams', [ExamController::class, 'store'])->name('exams.store');
+Route::delete('/exams/{exam}', [ExamController::class, 'destroy'])->name('exams.destroy');
+
+// Student Academic Reports & Scores
+Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+Route::get('/report', fn () => redirect()->route('admin.reports.index'));

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Official Academic Report Card - {{ $student->name ?? 'Sokha Chan' }}</title>
+    <title>Official Academic Report Card - {{ isset($student) && isset($student->user) ? $student->user->name : ($student->name ?? 'Student') }}</title>
     <style>
         @page {
             margin: 25px 30px;
@@ -16,7 +16,7 @@
             line-height: 1.4;
             background-color: #ffffff;
             margin: 0;
-            padding: 0;
+            padding: 20px;
         }
 
         .header-table {
@@ -126,6 +126,8 @@
         .grade-a { background-color: #dcfce7; color: #15803d; }
         .grade-b { background-color: #e0f2fe; color: #0369a1; }
         .grade-c { background-color: #fef3c7; color: #b45309; }
+        .grade-d { background-color: #fef9c3; color: #a16207; }
+        .grade-f { background-color: #fee2e2; color: #b91c1c; }
 
         .summary-box {
             width: 100%;
@@ -176,6 +178,28 @@
             font-weight: bold;
             text-transform: uppercase;
         }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+        }
+
+        .screen-toolbar {
+            background-color: #0f172a;
+            color: #ffffff;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -183,13 +207,52 @@
 @php
     $studentName = isset($student) && isset($student->user) ? $student->user->name : (isset($student->name) ? $student->name : 'Sokha Chan');
     $studentCode = isset($student->student_code) ? $student->student_code : 'STU-1001';
-    $classroomName = isset($classroom->name) ? $classroom->name : 'Grade 10-A (Room 302)';
+    $classroomName = isset($classroom->name) ? $classroom->name : 'Grade 10-A';
     $gradeLevel = isset($classroom->grade_level) ? $classroom->grade_level : 'Grade 10';
-    $dob = isset($student->date_of_birth) && is_object($student->date_of_birth) ? $student->date_of_birth->format('M d, Y') : 'May 15, 2008';
+    $academicYear = isset($classroom->academic_year) ? $classroom->academic_year : '2025-2026';
+    $dob = isset($student->date_of_birth) && is_object($student->date_of_birth) ? $student->date_of_birth->format('M d, Y') : (is_string($student?->date_of_birth) ? $student->date_of_birth : 'May 15, 2008');
     $gender = isset($student->gender) ? $student->gender : 'Male';
     $parentName = isset($student->parent_name) ? $student->parent_name : 'Chan Dara';
     $parentPhone = isset($student->parent_phone) ? $student->parent_phone : '+855 12 345 678';
 @endphp
+
+    <!-- Screen Navigation Toolbar (Hidden during Print) -->
+    <div class="no-print screen-toolbar">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <a href="{{ url('/admin/reports') }}" style="color: #94a3b8; text-decoration: none; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 4px;">
+                &larr; Back to Admin Reports
+            </a>
+            <span style="color: #475569;">|</span>
+            <span style="font-size: 12px; font-weight: 500; color: #cbd5e1;">Student: <strong style="color: #ffffff;">{{ $studentName }}</strong> ({{ $studentCode }})</span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px;">
+            @if(isset($allStudents) && $allStudents->isNotEmpty())
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <label for="student_switcher" style="font-size: 11px; color: #94a3b8;">Switch Student:</label>
+                    <select 
+                        id="student_switcher"
+                        onchange="if(this.value) window.location.href='{{ url('/pdf/report-card') }}?student_id=' + this.value" 
+                        style="padding: 4px 8px; font-size: 12px; border-radius: 4px; border: 1px solid #475569; background-color: #1e293b; color: #ffffff; cursor: pointer;"
+                    >
+                        @foreach($allStudents as $st)
+                            <option value="{{ $st->id }}" {{ (isset($student) && $student->id === $st->id) ? 'selected' : '' }}>
+                                {{ $st->user?->name ?? 'Student' }} ({{ $st->student_code }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+
+            <button 
+                type="button" 
+                onclick="window.print()" 
+                style="background-color: #3b82f6; color: #ffffff; border: none; padding: 6px 14px; font-size: 12px; font-weight: bold; border-radius: 6px; cursor: pointer;"
+            >
+                Print / Save PDF
+            </button>
+        </div>
+    </div>
 
     <!-- Official Header -->
     <table class="header-table" cellpadding="0" cellspacing="0">
@@ -202,7 +265,7 @@
             <td style="width: 30%; text-align: right; vertical-align: top;">
                 <div class="doc-badge">Academic Transcript</div>
                 <p style="font-size: 9px; color: #64748b; margin: 6px 0 0 0;">Date Issued: <strong>{{ date('M d, Y') }}</strong></p>
-                <p style="font-size: 9px; color: #64748b; margin: 2px 0 0 0;">Academic Year: <strong>2025-2026</strong></p>
+                <p style="font-size: 9px; color: #64748b; margin: 2px 0 0 0;">Academic Year: <strong>{{ $academicYear }}</strong></p>
             </td>
         </tr>
     </table>
@@ -211,7 +274,7 @@
     <table class="info-table" cellpadding="0" cellspacing="0">
         <tr>
             <td class="info-label">Student Name:</td>
-            <td class="info-value">{{ $studentName }}</td>
+            <td class="info-value" style="background-color: green; color: white; font-weight: bold;">{{ $studentName }}</td>
             <td class="info-label">Student ID:</td>
             <td class="info-value font-mono">{{ $studentCode }}</td>
         </tr>
@@ -241,29 +304,23 @@
             <tr>
                 <th style="width: 5%;">#</th>
                 <th style="width: 15%;">Subject Code</th>
-                <th style="width: 35%;">Subject Title</th>
+                <th style="width: 35%;">Subject / Examination</th>
                 <th style="width: 15%; text-align: center;">Score (100)</th>
                 <th style="width: 15%; text-align: center;">Letter Grade</th>
                 <th style="width: 15%; text-align: center;">GPA Points</th>
             </tr>
         </thead>
         <tbody>
-            @php
-                $gradesData = [
-                    ['code' => 'WEB401', 'title' => 'Web Application Development (Laravel)', 'score' => '96.50', 'grade' => 'A', 'point' => '4.00', 'class' => 'grade-a'],
-                    ['code' => 'DBS301', 'title' => 'Relational Database Management Systems', 'score' => '91.00', 'grade' => 'A', 'point' => '4.00', 'class' => 'grade-a'],
-                    ['code' => 'MATH101', 'title' => 'Discrete Mathematics & Logic', 'score' => '88.50', 'grade' => 'B+', 'point' => '3.50', 'class' => 'grade-b'],
-                    ['code' => 'ENG201', 'title' => 'Technical English Communications', 'score' => '93.00', 'grade' => 'A', 'point' => '4.00', 'class' => 'grade-a'],
-                    ['code' => 'NET202', 'title' => 'Data Communication & Computer Networks', 'score' => '85.00', 'grade' => 'B+', 'point' => '3.50', 'class' => 'grade-b'],
-                    ['code' => 'PRG102', 'title' => 'Object-Oriented Programming (OOP)', 'score' => '89.00', 'grade' => 'B+', 'point' => '3.50', 'class' => 'grade-b'],
-                ];
-            @endphp
-
-            @foreach($gradesData as $index => $item)
+            @foreach($marks as $index => $item)
                 <tr>
                     <td class="text-center font-mono">{{ $index + 1 }}</td>
                     <td class="font-mono font-bold" style="color: #1e3a8a;">{{ $item['code'] }}</td>
-                    <td>{{ $item['title'] }}</td>
+                    <td>
+                        <strong>{{ $item['title'] }}</strong>
+                        @if(isset($item['exam_title']) && $item['exam_title'] && $item['exam_title'] !== $item['title'])
+                            <div style="font-size: 8px; color: #64748b; margin-top: 1px;">Exam: {{ $item['exam_title'] }}</div>
+                        @endif
+                    </td>
                     <td class="text-center font-mono font-bold">{{ $item['score'] }}</td>
                     <td class="text-center">
                         <span class="grade-pill {{ $item['class'] }}">{{ $item['grade'] }}</span>
@@ -279,19 +336,21 @@
         <tr>
             <td class="summary-cell" style="width: 25%;">
                 <span style="font-size: 9px; color: #64748b; text-transform: uppercase;">Total Score</span>
-                <p style="font-size: 16px; font-weight: bold; margin: 4px 0 0 0; color: #0f172a;" class="font-mono">543.00 / 600</p>
+                <p style="font-size: 16px; font-weight: bold; margin: 4px 0 0 0; color: #0f172a;" class="font-mono">{{ $totalScoreSum ?? '543.00' }} / {{ $maxPossibleScore ?? 600 }}</p>
             </td>
             <td class="summary-cell" style="width: 25%;">
                 <span style="font-size: 9px; color: #64748b; text-transform: uppercase;">Semester GPA</span>
-                <p style="font-size: 16px; font-weight: bold; margin: 4px 0 0 0; color: #1e3a8a;" class="font-mono">3.75 / 4.00</p>
+                <p style="font-size: 16px; font-weight: bold; margin: 4px 0 0 0; color: #1e3a8a;" class="font-mono">{{ $semesterGpa ?? '3.75' }} / 4.00</p>
             </td>
             <td class="summary-cell" style="width: 25%;">
                 <span style="font-size: 9px; color: #64748b; text-transform: uppercase;">Academic Standing</span>
-                <p style="font-size: 14px; font-weight: bold; margin: 4px 0 0 0; color: #15803d;">HONORS / PASSED</p>
+                <p style="font-size: 14px; font-weight: bold; margin: 4px 0 0 0; color: {{ ($academicStanding ?? '') === 'ACADEMIC PROBATION' ? '#b91c1c' : '#15803d' }};">
+                    {{ $academicStanding ?? 'HONORS / PASSED' }}
+                </p>
             </td>
             <td class="summary-cell" style="width: 25%;">
                 <span style="font-size: 9px; color: #64748b; text-transform: uppercase;">Attendance Record</span>
-                <p style="font-size: 16px; font-weight: bold; margin: 4px 0 0 0; color: #0f172a;" class="font-mono">98.2%</p>
+                <p style="font-size: 16px; font-weight: bold; margin: 4px 0 0 0; color: #0f172a;" class="font-mono">{{ $attendanceRate ?? '98.2%' }}</p>
             </td>
         </tr>
     </table>

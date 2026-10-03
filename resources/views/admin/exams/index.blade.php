@@ -4,7 +4,18 @@
 @section('page_title', 'Exams & Marks')
 
 @section('content')
-<div class="space-y-6" x-data="{ addExamModal: {{ $errors->any() ? 'true' : 'false' }} }">
+<div class="space-y-6" x-data="{ 
+    addExamModal: {{ $errors->any() ? 'true' : 'false' }},
+    modalTitle: '{{ old('title', '') }}',
+    modalClassroomId: '{{ old('classroom_id', '') }}',
+    titleMode: 'new',
+    openAssignModal(title = '', classroomId = '') {
+        this.modalTitle = title;
+        this.modalClassroomId = classroomId;
+        this.titleMode = title ? 'existing' : 'new';
+        this.addExamModal = true;
+    }
+}">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -13,7 +24,7 @@
         </div>
         <div class="flex items-center gap-3">
             <button 
-                @click="addExamModal = true"
+                @click="openAssignModal()"
                 type="button" 
                 class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
@@ -95,7 +106,7 @@
             </form>
 
             <p class="text-xs text-slate-400 self-end sm:self-auto">
-                Showing <span class="font-semibold text-slate-700">{{ $exams->total() }}</span> scheduled {{ Str::plural('exam', $exams->total()) }}
+                Showing <span class="font-semibold text-slate-700">{{ $groupedExams->count() }}</span> {{ Str::plural('exam', $groupedExams->count()) }} (<span class="font-semibold text-slate-700">{{ $exams->total() }}</span> assigned {{ Str::plural('subject', $exams->total()) }})
             </p>
         </div>
 

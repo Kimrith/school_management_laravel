@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use App\Models\Level;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -21,6 +22,7 @@ class LevelManagementTest extends TestCase
             'name' => 'Admin User',
             'email' => 'admin@school.edu',
             'password' => bcrypt('password123'),
+            'role' => Role::Admin,
         ]);
     }
 

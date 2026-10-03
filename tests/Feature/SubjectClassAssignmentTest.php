@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use App\Models\Classroom;
 use App\Models\Subject;
 use App\Models\TeacherSubject;
@@ -23,6 +24,7 @@ class SubjectClassAssignmentTest extends TestCase
             'name' => 'Admin User',
             'email' => 'admin@school.edu',
             'password' => bcrypt('password123'),
+            'role' => Role::Admin,
         ]);
     }
 

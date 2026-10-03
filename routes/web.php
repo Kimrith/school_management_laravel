@@ -2,7 +2,7 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\Auth\AuthController;
-use App\Models\StudentProfile;
+use App\Http\Controllers\ReportCardController;
 use Illuminate\Support\Facades\Route;
 
 // Authentication
@@ -23,15 +23,25 @@ Route::middleware('auth')->group(function () {
             default => redirect()->route('login'),
         };
     })->name('dashboard');
-
-    Route::redirect('/admin', '/admin/dashboard');
-    Route::redirect('/teacher', '/teacher/dashboard');
-    Route::redirect('/student', '/student/dashboard');
+    Route::redirect('/admin', '/admin/dashboard')->middleware('role:admin');
+    Route::redirect('/teacher', '/teacher/dashboard')->middleware('role:teacher');
+    Route::redirect('/student', '/student/dashboard')->middleware('role:student');
 
     // Protected Module Routes
-    Route::prefix('admin')->name('admin.')->group(base_path('routes/admin/web.php'));
-    Route::prefix('teacher')->name('teacher.')->group(base_path('routes/teacher/web.php'));
-    Route::prefix('student')->name('student.')->group(base_path('routes/student/web.php'));
+    Route::prefix('admin')
+        ->name('admin.')
+        ->middleware('role:admin')
+        ->group(base_path('routes/admin/web.php'));
+
+    Route::prefix('teacher')
+        ->name('teacher.')
+        ->middleware('role:teacher')
+        ->group(base_path('routes/teacher/web.php'));
+
+    Route::prefix('student')
+        ->name('student.')
+        ->middleware('role:student')
+        ->group(base_path('routes/student/web.php'));
 });
 
 // Root URL: redirects to login if guest, or dashboard if authenticated
@@ -44,11 +54,4 @@ Route::get('/', function () {
 });
 
 // Shared / PDF Routes
-Route::get('/pdf/report-card', function () {
-    $student = StudentProfile::with(['user', 'classroom'])->first();
-
-    return view('pdf.report-card', [
-        'student' => $student,
-        'classroom' => $student?->classroom,
-    ]);
-})->name('pdf.report-card');
+Route::get('/pdf/report-card/{student?}', [ReportCardController::class, 'show'])->name('pdf.report-card');

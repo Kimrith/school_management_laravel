@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use App\Models\Classroom;
 use App\Models\Level;
 use App\Models\Subject;
@@ -24,6 +25,7 @@ class SubjectLevelClassRelationshipTest extends TestCase
             'name' => 'Admin User',
             'email' => 'admin@school.edu',
             'password' => bcrypt('password123'),
+            'role' => Role::Admin,
         ]);
     }
 
