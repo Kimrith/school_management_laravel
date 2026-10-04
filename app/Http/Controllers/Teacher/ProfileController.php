@@ -28,11 +28,12 @@ class ProfileController extends Controller
             $teacher = TeacherProfile::firstOrCreate(['user_id' => $user->id]);
         }
 
-        $teacher?->loadMissing(['user', 'taughtSubjects', 'taughtClassrooms', 'teacherSubjects.subject', 'teacherSubjects.classroom']);
+        $teacher?->loadMissing(['user', 'taughtSubjects', 'taughtClassrooms.studentProfiles', 'teacherSubjects.subject', 'teacherSubjects.classroom.studentProfiles']);
 
         // Active classrooms assigned to this teacher
         $assignedClassrooms = $teacher?->taughtClassrooms?->unique('id') ?? collect();
         $assignedSubjects = $teacher?->taughtSubjects?->unique('id') ?? collect();
+        $teacherSubjects = $teacher?->teacherSubjects ?? collect();
 
         // Calculate assigned students count
         $classroomIds = $assignedClassrooms->pluck('id')->filter()->all();
@@ -40,12 +41,16 @@ class ProfileController extends Controller
             ? StudentProfile::whereIn('classroom_id', $classroomIds)->count()
             : 0;
 
+        $teachingLoadHours = $teacherSubjects->count() * 3;
+
         return view('teacher.profile.index', [
             'teacher' => $teacher,
             'user' => $teacher?->user ?? $user,
             'assignedClassrooms' => $assignedClassrooms,
             'assignedSubjects' => $assignedSubjects,
+            'teacherSubjects' => $teacherSubjects,
             'totalStudents' => $totalStudents,
+            'teachingLoadHours' => $teachingLoadHours,
         ]);
     }
 

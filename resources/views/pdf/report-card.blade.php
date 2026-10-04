@@ -205,15 +205,15 @@
 <body>
 
 @php
-    $studentName = isset($student) && isset($student->user) ? $student->user->name : (isset($student->name) ? $student->name : 'Sokha Chan');
-    $studentCode = isset($student->student_code) ? $student->student_code : 'STU-1001';
-    $classroomName = isset($classroom->name) ? $classroom->name : 'Grade 10-A';
-    $gradeLevel = isset($classroom->grade_level) ? $classroom->grade_level : 'Grade 10';
-    $academicYear = isset($classroom->academic_year) ? $classroom->academic_year : '2025-2026';
-    $dob = isset($student->date_of_birth) && is_object($student->date_of_birth) ? $student->date_of_birth->format('M d, Y') : (is_string($student?->date_of_birth) ? $student->date_of_birth : 'May 15, 2008');
-    $gender = isset($student->gender) ? $student->gender : 'Male';
-    $parentName = isset($student->parent_name) ? $student->parent_name : 'Chan Dara';
-    $parentPhone = isset($student->parent_phone) ? $student->parent_phone : '+855 12 345 678';
+    $studentName = $student?->user?->name ?? $student?->name ?? 'N/A';
+    $studentCode = $student?->student_code ?? 'N/A';
+    $classroomName = $classroom?->name ?? 'Unassigned';
+    $gradeLevel = $classroom?->grade_level ?? 'N/A';
+    $academicYear = $classroom?->academic_year ?? 'N/A';
+    $dob = $student?->date_of_birth ? (\Illuminate\Support\Carbon::parse($student->date_of_birth)->format('M d, Y')) : 'N/A';
+    $gender = $student?->gender ?? 'N/A';
+    $parentName = $student?->parent_name ?? 'N/A';
+    $parentPhone = $student?->parent_phone ?? 'N/A';
 @endphp
 
     <!-- Screen Navigation Toolbar (Hidden during Print) -->
@@ -274,7 +274,7 @@
     <table class="info-table" cellpadding="0" cellspacing="0">
         <tr>
             <td class="info-label">Student Name:</td>
-            <td class="info-value" style="background-color: green; color: white; font-weight: bold;">{{ $studentName }}</td>
+            <td class="info-value font-bold">{{ $studentName }}</td>
             <td class="info-label">Student ID:</td>
             <td class="info-value font-mono">{{ $studentCode }}</td>
         </tr>
@@ -311,7 +311,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($marks as $index => $item)
+            @forelse($marks as $index => $item)
                 <tr>
                     <td class="text-center font-mono">{{ $index + 1 }}</td>
                     <td class="font-mono font-bold" style="color: #1e3a8a;">{{ $item['code'] }}</td>
@@ -327,7 +327,13 @@
                     </td>
                     <td class="text-center font-mono font-bold">{{ $item['point'] }}</td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="6" class="text-center" style="padding: 24px; color: #64748b;">
+                        <em>No official marks recorded for this academic period.</em>
+                    </td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 
@@ -336,21 +342,21 @@
         <tr>
             <td class="summary-cell" style="width: 25%;">
                 <span style="font-size: 9px; color: #64748b; text-transform: uppercase;">Total Score</span>
-                <p style="font-size: 16px; font-weight: bold; margin: 4px 0 0 0; color: #0f172a;" class="font-mono">{{ $totalScoreSum ?? '543.00' }} / {{ $maxPossibleScore ?? 600 }}</p>
+                <p style="font-size: 16px; font-weight: bold; margin: 4px 0 0 0; color: #0f172a;" class="font-mono">{{ $totalScoreSum }} / {{ $maxPossibleScore }}</p>
             </td>
             <td class="summary-cell" style="width: 25%;">
                 <span style="font-size: 9px; color: #64748b; text-transform: uppercase;">Semester GPA</span>
-                <p style="font-size: 16px; font-weight: bold; margin: 4px 0 0 0; color: #1e3a8a;" class="font-mono">{{ $semesterGpa ?? '3.75' }} / 4.00</p>
+                <p style="font-size: 16px; font-weight: bold; margin: 4px 0 0 0; color: #1e3a8a;" class="font-mono">{{ $semesterGpa }} / 4.00</p>
             </td>
             <td class="summary-cell" style="width: 25%;">
                 <span style="font-size: 9px; color: #64748b; text-transform: uppercase;">Academic Standing</span>
-                <p style="font-size: 14px; font-weight: bold; margin: 4px 0 0 0; color: {{ ($academicStanding ?? '') === 'ACADEMIC PROBATION' ? '#b91c1c' : '#15803d' }};">
-                    {{ $academicStanding ?? 'HONORS / PASSED' }}
+                <p style="font-size: 14px; font-weight: bold; margin: 4px 0 0 0; color: {{ ($academicStanding ?? '') === 'ACADEMIC PROBATION' ? '#b91c1c' : (($academicStanding ?? '') === 'NO MARKS RECORDED' ? '#64748b' : '#15803d') }};">
+                    {{ $academicStanding }}
                 </p>
             </td>
             <td class="summary-cell" style="width: 25%;">
                 <span style="font-size: 9px; color: #64748b; text-transform: uppercase;">Attendance Record</span>
-                <p style="font-size: 16px; font-weight: bold; margin: 4px 0 0 0; color: #0f172a;" class="font-mono">{{ $attendanceRate ?? '98.2%' }}</p>
+                <p style="font-size: 16px; font-weight: bold; margin: 4px 0 0 0; color: #0f172a;" class="font-mono">{{ $attendanceRate }}</p>
             </td>
         </tr>
     </table>
@@ -375,7 +381,7 @@
             <td style="width: 33%; text-align: center; vertical-align: bottom;">
                 <div class="signature-line"></div>
                 <p class="signature-title">Class Head Teacher</p>
-                <p style="font-size: 8px; color: #94a3b8; margin: 2px 0 0 0;">Prof. Virak Meas</p>
+                <p style="font-size: 8px; color: #94a3b8; margin: 2px 0 0 0;">{{ $classroom?->teachers?->first()?->name ?? 'Faculty Advisor' }}</p>
             </td>
             <td style="width: 34%; text-align: center; vertical-align: bottom;">
                 <div style="width: 60px; height: 60px; border: 2px dashed #cbd5e1; border-radius: 50%; margin: 0 auto 5px auto; line-height: 60px; font-size: 8px; color: #94a3b8;">
@@ -386,7 +392,7 @@
             <td style="width: 33%; text-align: center; vertical-align: bottom;">
                 <div class="signature-line"></div>
                 <p class="signature-title">Academic Director / Dean</p>
-                <p style="font-size: 8px; color: #94a3b8; margin: 2px 0 0 0;">Dean of Computer Science</p>
+                <p style="font-size: 8px; color: #94a3b8; margin: 2px 0 0 0;">Dean of Academic Affairs</p>
             </td>
         </tr>
     </table>

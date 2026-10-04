@@ -13,8 +13,8 @@
                     {{ strtoupper(substr(auth()->user()->name ?? 'Prof', 0, 2)) }}
                 </div>
                 <div>
-                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Welcome, {{ auth()->user()->name ?? 'Prof. Virak Meas' }}</h1>
-                    <p class="text-emerald-100 text-xs sm:text-sm mt-1">Computer Science & Web Engineering &bull; Master of Computer Science</p>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Welcome, {{ auth()->user()->name ?? 'Faculty Member' }}</h1>
+                    <p class="text-emerald-100 text-xs sm:text-sm mt-1">{{ auth()->user()->teacherProfile?->specialization ?? auth()->user()->teacherProfile?->qualification ?? 'Faculty Member' }}</p>
                 </div>
             </div>
 

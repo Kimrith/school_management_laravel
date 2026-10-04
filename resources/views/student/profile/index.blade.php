@@ -5,18 +5,18 @@
 
 @section('content')
 @php
-    $userName = $student?->user?->name ?? 'Sokha Chan';
-    $userEmail = $student?->user?->email ?? 'sokha@example.com';
-    $studentCode = $student?->student_code ?? 'STU-1001';
-    $className = $student?->classroom?->name ?? 'Grade 10-A';
-    $gradeLevel = $student?->classroom?->grade_level ?? 'Grade 10';
-    $academicYear = $student?->classroom?->academic_year ?? '2025-2026';
-    $dob = $student?->date_of_birth ? \Illuminate\Support\Carbon::parse($student->date_of_birth) : \Illuminate\Support\Carbon::parse('2008-04-12');
-    $age = $dob ? $dob->age : 18;
-    $gender = ucfirst($student?->gender ?? 'Male');
-    $parentName = $student?->parent_name ?? 'Chan Dara';
-    $parentPhone = $student?->parent_phone ?? '012 345 678';
-    $address = $student?->address ?? 'Phnom Penh, Cambodia';
+    $userName = $student?->user?->name ?? auth()->user()?->name ?? 'Student';
+    $userEmail = $student?->user?->email ?? auth()->user()?->email ?? '';
+    $studentCode = $student?->student_code ?? 'STU-0000';
+    $className = $student?->classroom?->name ?? 'Unassigned';
+    $gradeLevel = $student?->classroom?->grade_level ?? 'N/A';
+    $academicYear = $student?->classroom?->academic_year ?? date('Y');
+    $dob = $student?->date_of_birth ? \Illuminate\Support\Carbon::parse($student->date_of_birth) : null;
+    $age = $dob ? $dob->age : 'N/A';
+    $gender = $student?->gender ? ucfirst($student->gender) : 'Not specified';
+    $parentName = $student?->parent_name ?? 'Not specified';
+    $parentPhone = $student?->parent_phone ?? 'Not specified';
+    $address = $student?->address ?? 'Not specified';
 @endphp
 
 <div 
@@ -153,8 +153,12 @@
                         <div>
                             <span class="text-xs font-medium text-slate-400 block mb-1">Date of Birth</span>
                             <span class="font-semibold text-slate-800">
-                                {{ $dob->format('F d, Y') }} 
-                                <span class="text-slate-400 font-normal text-xs">({{ $age }} years old)</span>
+                                @if($dob)
+                                    {{ $dob->format('F d, Y') }} 
+                                    <span class="text-slate-400 font-normal text-xs">({{ $age }} years old)</span>
+                                @else
+                                    Not specified
+                                @endif
                             </span>
                         </div>
 
@@ -335,20 +339,20 @@
 
                 <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
                     <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Academic Advisor</span>
-                    <p class="text-sm font-bold text-slate-900 mt-1">Prof. Virak Meas</p>
-                    <p class="text-xs text-slate-500">Head of Computer Science</p>
+                    <p class="text-sm font-bold text-slate-900 mt-1">{{ $student?->classroom?->teachers?->first()?->name ?? 'Department Faculty' }}</p>
+                    <p class="text-xs text-slate-500">Classroom Advisor</p>
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
                     <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Homeroom Location</span>
-                    <p class="text-sm font-bold text-slate-900 mt-1">Building B, Room 302</p>
-                    <p class="text-xs text-slate-500">Main Campus North</p>
+                    <p class="text-sm font-bold text-slate-900 mt-1">{{ $student?->classroom?->room ? 'Room ' . $student->classroom->room : 'Campus Classroom' }}</p>
+                    <p class="text-xs text-slate-500">{{ $className }}</p>
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70">
-                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Expected Graduation</span>
-                    <p class="text-sm font-bold text-indigo-600 mt-1">July 2026</p>
-                    <p class="text-xs text-slate-500">Term 1 In Progress</p>
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Enrollment Status</span>
+                    <p class="text-sm font-bold text-indigo-600 mt-1">Active Academic Term</p>
+                    <p class="text-xs text-slate-500">{{ $academicYear }}</p>
                 </div>
             </div>
         </div>
@@ -362,7 +366,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 border border-sky-200">
-                        Term 1 &bull; 6 Subjects
+                        {{ $student?->classroom?->teacherSubjects?->count() ?? 0 }} Enrolled {{ \Illuminate\Support\Str::plural('Subject', $student?->classroom?->teacherSubjects?->count() ?? 0) }}
                     </span>
                 </div>
             </div>
@@ -379,179 +383,58 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-slate-700">
-                        <!-- Subject 1 -->
-                        <tr class="hover:bg-slate-50/70 transition-colors">
-                            <td class="px-5 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 font-bold text-xs flex items-center justify-center shrink-0">
-                                        WEB
+                        @php
+                            $subjects = $student?->classroom?->teacherSubjects ?? collect();
+                            $studentMarksBySubject = $student?->marks?->keyBy(fn($m) => $m->exam?->subject_id) ?? collect();
+                        @endphp
+                        @forelse($subjects as $item)
+                            @php
+                                $subject = $item->subject;
+                                $instructor = $item->teacher;
+                                $code = $subject?->code ?? ('SUB-' . ($subject?->id ?? 1));
+                                $mark = $studentMarksBySubject->get($subject?->id);
+                            @endphp
+                            <tr class="hover:bg-slate-50/70 transition-colors">
+                                <td class="px-5 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-700 font-bold text-xs flex items-center justify-center shrink-0">
+                                            {{ strtoupper(substr($code, 0, 3)) }}
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-900">{{ $subject?->name ?? 'Course Subject' }}</p>
+                                            <p class="text-xs text-slate-400 font-mono">{{ $code }}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="font-bold text-slate-900">Web Application Development</p>
-                                        <p class="text-xs text-slate-400 font-mono">WEB401</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-5 py-4">
-                                <p class="font-medium text-slate-800">Prof. Virak Meas</p>
-                                <p class="text-xs text-slate-400">virak.meas@school.edu</p>
-                            </td>
-                            <td class="px-5 py-4">
-                                <p class="font-medium text-slate-800">Mon &amp; Wed &bull; 08:00 - 09:30 AM</p>
-                                <p class="text-xs text-slate-400">Room 302</p>
-                            </td>
-                            <td class="px-5 py-4 text-center font-mono font-bold text-slate-800">4.0</td>
-                            <td class="px-5 py-4 text-center">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold font-mono text-xs">
-                                    A (96.5%)
-                                </span>
-                            </td>
-                        </tr>
-
-                        <!-- Subject 2 -->
-                        <tr class="hover:bg-slate-50/70 transition-colors">
-                            <td class="px-5 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0">
-                                        MAT
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-slate-900">Discrete Mathematics &amp; Logic</p>
-                                        <p class="text-xs text-slate-400 font-mono">MATH101</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-5 py-4">
-                                <p class="font-medium text-slate-800">Dr. Sopheap Ouk</p>
-                                <p class="text-xs text-slate-400">sopheap.ouk@school.edu</p>
-                            </td>
-                            <td class="px-5 py-4">
-                                <p class="font-medium text-slate-800">Mon &amp; Wed &bull; 10:00 - 11:30 AM</p>
-                                <p class="text-xs text-slate-400">Room 204</p>
-                            </td>
-                            <td class="px-5 py-4 text-center font-mono font-bold text-slate-800">4.0</td>
-                            <td class="px-5 py-4 text-center">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-sky-50 text-sky-700 border border-sky-200 font-bold font-mono text-xs">
-                                    B+ (88.0%)
-                                </span>
-                            </td>
-                        </tr>
-
-                        <!-- Subject 3 -->
-                        <tr class="hover:bg-slate-50/70 transition-colors">
-                            <td class="px-5 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 font-bold text-xs flex items-center justify-center shrink-0">
-                                        DBS
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-slate-900">Relational Database Management</p>
-                                        <p class="text-xs text-slate-400 font-mono">DBS301</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-5 py-4">
-                                <p class="font-medium text-slate-800">Prof. Virak Meas</p>
-                                <p class="text-xs text-slate-400">virak.meas@school.edu</p>
-                            </td>
-                            <td class="px-5 py-4">
-                                <p class="font-medium text-slate-800">Tue &amp; Thu &bull; 08:00 - 09:30 AM</p>
-                                <p class="text-xs text-slate-400">Room 304</p>
-                            </td>
-                            <td class="px-5 py-4 text-center font-mono font-bold text-slate-800">4.0</td>
-                            <td class="px-5 py-4 text-center">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-sky-50 text-sky-700 border border-sky-200 font-bold font-mono text-xs">
-                                    B (84.5%)
-                                </span>
-                            </td>
-                        </tr>
-
-                        <!-- Subject 4 -->
-                        <tr class="hover:bg-slate-50/70 transition-colors">
-                            <td class="px-5 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 font-bold text-xs flex items-center justify-center shrink-0">
-                                        ENG
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-slate-900">Technical English Communications</p>
-                                        <p class="text-xs text-slate-400 font-mono">ENG201</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-5 py-4">
-                                <p class="font-medium text-slate-800">Ms. Kunthea Chea</p>
-                                <p class="text-xs text-slate-400">kunthea.chea@school.edu</p>
-                            </td>
-                            <td class="px-5 py-4">
-                                <p class="font-medium text-slate-800">Tue &amp; Thu &bull; 01:30 - 03:00 PM</p>
-                                <p class="text-xs text-slate-400">Room 105</p>
-                            </td>
-                            <td class="px-5 py-4 text-center font-mono font-bold text-slate-800">4.0</td>
-                            <td class="px-5 py-4 text-center">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold font-mono text-xs">
-                                    A (92.0%)
-                                </span>
-                            </td>
-                        </tr>
-
-                        <!-- Subject 5 -->
-                        <tr class="hover:bg-slate-50/70 transition-colors">
-                            <td class="px-5 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">
-                                        PHY
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-slate-900">Applied Physics &amp; Mechanics</p>
-                                        <p class="text-xs text-slate-400 font-mono">PHY202</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-5 py-4">
-                                <p class="font-medium text-slate-800">Dr. Chan Sambath</p>
-                                <p class="text-xs text-slate-400">sambath.chan@school.edu</p>
-                            </td>
-                            <td class="px-5 py-4">
-                                <p class="font-medium text-slate-800">Friday &bull; 08:00 - 11:00 AM</p>
-                                <p class="text-xs text-slate-400">Physics Lab 2</p>
-                            </td>
-                            <td class="px-5 py-4 text-center font-mono font-bold text-slate-800">4.0</td>
-                            <td class="px-5 py-4 text-center">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold font-mono text-xs">
-                                    A- (90.0%)
-                                </span>
-                            </td>
-                        </tr>
-
-                        <!-- Subject 6 -->
-                        <tr class="hover:bg-slate-50/70 transition-colors">
-                            <td class="px-5 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 font-bold text-xs flex items-center justify-center shrink-0">
-                                        HIS
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-slate-900">World History &amp; Southeast Asian Civics</p>
-                                        <p class="text-xs text-slate-400 font-mono">HIS101</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-5 py-4">
-                                <p class="font-medium text-slate-800">Mrs. Kolab Pich</p>
-                                <p class="text-xs text-slate-400">kolab.pich@school.edu</p>
-                            </td>
-                            <td class="px-5 py-4">
-                                <p class="font-medium text-slate-800">Friday &bull; 01:30 - 04:30 PM</p>
-                                <p class="text-xs text-slate-400">Room 108</p>
-                            </td>
-                            <td class="px-5 py-4 text-center font-mono font-bold text-slate-800">4.0</td>
-                            <td class="px-5 py-4 text-center">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold font-mono text-xs">
-                                    A (94.0%)
-                                </span>
-                            </td>
-                        </tr>
+                                </td>
+                                <td class="px-5 py-4">
+                                    <p class="font-medium text-slate-800">{{ $instructor?->name ?? 'Faculty Staff' }}</p>
+                                    <p class="text-xs text-slate-400">{{ $instructor?->email ?? '' }}</p>
+                                </td>
+                                <td class="px-5 py-4">
+                                    <p class="font-medium text-slate-800">{{ $student?->classroom?->room ? 'Room ' . $student->classroom->room : 'Campus Classroom' }}</p>
+                                    <p class="text-xs text-slate-400">Section {{ $className }}</p>
+                                </td>
+                                <td class="px-5 py-4 text-center font-mono font-bold text-slate-800">3.0</td>
+                                <td class="px-5 py-4 text-center">
+                                    @if($mark)
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold font-mono text-xs">
+                                            {{ $mark->grade_letter ?? 'Recorded' }} ({{ number_format((float) $mark->marks_obtained, 1) }}%)
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 text-xs">
+                                            In Progress
+                                        </span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-5 py-8 text-center text-slate-400">
+                                    <p class="text-sm font-medium text-slate-600">No enrolled subjects registered</p>
+                                    <p class="text-xs text-slate-400 mt-1">Subjects assigned to your section will appear in this list.</p>
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -656,11 +539,11 @@
                                 </div>
                                 <div>
                                     <span class="text-[9px] font-semibold uppercase tracking-wider text-slate-400 block">Issued</span>
-                                    <p class="font-mono text-slate-300 text-[11px]">09/2024</p>
+                                    <p class="font-mono text-slate-300 text-[11px]">{{ $student?->created_at ? \Illuminate\Support\Carbon::parse($student->created_at)->format('m/Y') : date('m/Y') }}</p>
                                 </div>
                                 <div>
                                     <span class="text-[9px] font-semibold uppercase tracking-wider text-slate-400 block">Expires</span>
-                                    <p class="font-mono font-bold text-amber-300 text-[11px]">08/2026</p>
+                                    <p class="font-mono font-bold text-amber-300 text-[11px]">{{ $student?->created_at ? \Illuminate\Support\Carbon::parse($student->created_at)->addYears(2)->format('m/Y') : date('m/Y', strtotime('+2 years')) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -691,7 +574,7 @@
                                 <span class="w-1 h-full bg-white"></span>
                                 <span class="w-0.5 h-full bg-white"></span>
                             </div>
-                            <span class="font-mono text-[9px] text-slate-400 tracking-widest block">{{ $studentCode }} - 884920</span>
+                            <span class="font-mono text-[9px] text-slate-400 tracking-widest block">{{ $studentCode }}</span>
                         </div>
 
                         <!-- Holographic Seal Badge -->
@@ -956,7 +839,7 @@
                                 <input 
                                     type="date" 
                                     name="dob" 
-                                    value="{{ $dob->format('Y-m-d') }}" 
+                                    value="{{ $dob ? $dob->format('Y-m-d') : '' }}" 
                                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 font-medium"
                                 >
                             </div>

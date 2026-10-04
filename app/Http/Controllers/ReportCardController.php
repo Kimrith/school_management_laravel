@@ -25,7 +25,7 @@ class ReportCardController extends Controller
 
         $query = StudentProfile::query()->with([
             'user',
-            'classroom',
+            'classroom.teachers',
             'attendances',
             'marks.exam.subject',
             'marks.exam.classroom',
@@ -116,29 +116,21 @@ class ReportCardController extends Controller
             };
             $formattedTotalScore = number_format($totalScoreSum, 2);
         } else {
-            // Default curriculum marks if student has not been assigned exam marks yet
-            $processedMarks = collect([
-                ['code' => 'WEB401', 'title' => 'Web Application Development (Laravel)', 'exam_title' => 'Final Exam', 'score' => '96.50', 'raw_score' => 96.5, 'grade' => 'A', 'point' => '4.00', 'raw_point' => 4.0, 'class' => 'grade-a'],
-                ['code' => 'DBS301', 'title' => 'Relational Database Management Systems', 'exam_title' => 'Final Exam', 'score' => '91.00', 'raw_score' => 91.0, 'grade' => 'A', 'point' => '4.00', 'raw_point' => 4.0, 'class' => 'grade-a'],
-                ['code' => 'MATH101', 'title' => 'Discrete Mathematics & Logic', 'exam_title' => 'Final Exam', 'score' => '88.50', 'raw_score' => 88.5, 'grade' => 'B+', 'point' => '3.50', 'raw_point' => 3.5, 'class' => 'grade-b'],
-                ['code' => 'ENG201', 'title' => 'Technical English Communications', 'exam_title' => 'Final Exam', 'score' => '93.00', 'raw_score' => 93.0, 'grade' => 'A', 'point' => '4.00', 'raw_point' => 4.0, 'class' => 'grade-a'],
-                ['code' => 'NET202', 'title' => 'Data Communication & Computer Networks', 'exam_title' => 'Final Exam', 'score' => '85.00', 'raw_score' => 85.0, 'grade' => 'B+', 'point' => '3.50', 'raw_point' => 3.5, 'class' => 'grade-b'],
-                ['code' => 'PRG102', 'title' => 'Object-Oriented Programming (OOP)', 'exam_title' => 'Final Exam', 'score' => '89.00', 'raw_score' => 89.0, 'grade' => 'B+', 'point' => '3.50', 'raw_point' => 3.5, 'class' => 'grade-b'],
-            ]);
-            $formattedTotalScore = '543.00';
-            $maxPossibleScore = 600;
-            $semesterGpa = '3.75';
-            $academicStanding = 'HONORS / PASSED';
+            $processedMarks = collect();
+            $formattedTotalScore = '0.00';
+            $maxPossibleScore = 0;
+            $semesterGpa = '0.00';
+            $academicStanding = 'NO MARKS RECORDED';
         }
 
         // Attendance rate
-        $attendanceRate = '98.5%';
+        $attendanceRate = 'N/A';
         if ($studentProfile && $studentProfile->attendances->isNotEmpty()) {
             $totalAttendances = $studentProfile->attendances->count();
             $presentCount = $studentProfile->attendances->filter(
                 fn ($att) => strtolower((string) $att->status) === 'present'
             )->count();
-            $rate = $totalAttendances > 0 ? round(($presentCount / $totalAttendances) * 100, 1) : 100.0;
+            $rate = $totalAttendances > 0 ? round(($presentCount / $totalAttendances) * 100, 1) : 0.0;
             $attendanceRate = $rate.'%';
         }
 

@@ -108,7 +108,7 @@
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="text-sm font-semibold text-slate-800 truncate">{{ auth()->user()->name ?? 'Student User' }}</p>
-                            <p class="text-xs text-slate-400 truncate">STU-1001 &bull; Grade 10-A</p>
+                            <p class="text-xs text-slate-400 truncate">{{ auth()->user()->studentProfile?->student_code ?? 'Student' }} &bull; {{ auth()->user()->studentProfile?->classroom?->name ?? 'Unassigned' }}</p>
                         </div>
                     </div>
 

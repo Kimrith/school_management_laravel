@@ -145,6 +145,24 @@ class PortalViewsTest extends TestCase
         $response->assertSee('Recent Exam Results');
     }
 
+    public function test_teacher_profile_view_renders(): void
+    {
+        $response = $this->actingAs($this->teacherUser)->get('/teacher/profile');
+        $response->assertStatus(200);
+        $response->assertSee('Faculty Bio');
+        $response->assertSee('Assigned Classes');
+        $response->assertSee('Digital Faculty ID Card');
+    }
+
+    public function test_student_profile_view_renders(): void
+    {
+        $response = $this->actingAs($this->studentUser)->get('/student/profile');
+        $response->assertStatus(200);
+        $response->assertSee('Guardian Info');
+        $response->assertSee('Academic Record');
+        $response->assertSee('Digital Student ID Card');
+    }
+
     public function test_pdf_report_card_view_renders(): void
     {
         $response = $this->actingAs($this->adminUser)->get('/pdf/report-card');
