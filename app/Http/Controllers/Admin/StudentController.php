@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class StudentController extends Controller
 {
@@ -93,9 +94,15 @@ class StudentController extends Controller
             'parent_name' => 'nullable|string|max:255',
             'parent_phone' => 'nullable|string|max:50',
             'address' => 'nullable|string',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:2048',
         ]);
 
-        DB::transaction(function () use ($validated) {
+        $avatarPath = null;
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars/students', 'public');
+        }
+
+        DB::transaction(function () use ($validated, $avatarPath) {
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -106,13 +113,14 @@ class StudentController extends Controller
 
             StudentProfile::create([
                 'user_id' => $user->id,
-                'classroom_id' => $validated['classroom_id'],
+                'classroom_id' => $validated['classroom_id'] ?? null,
                 'student_code' => $validated['student_code'],
-                'date_of_birth' => $validated['date_of_birth'],
+                'avatar' => $avatarPath,
+                'date_of_birth' => $validated['date_of_birth'] ?? null,
                 'gender' => $validated['gender'],
-                'parent_name' => $validated['parent_name'],
-                'parent_phone' => $validated['parent_phone'],
-                'address' => $validated['address'],
+                'parent_name' => $validated['parent_name'] ?? null,
+                'parent_phone' => $validated['parent_phone'] ?? null,
+                'address' => $validated['address'] ?? null,
             ]);
         });
 
@@ -140,9 +148,18 @@ class StudentController extends Controller
             'parent_phone' => 'nullable|string|max:50',
             'address' => 'nullable|string',
             'status' => 'nullable|in:active,inactive,pending,suspended',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:2048',
         ]);
 
-        DB::transaction(function () use ($validated, $student) {
+        $avatarPath = $student->avatar;
+        if ($request->hasFile('avatar')) {
+            if ($student->avatar && Storage::disk('public')->exists($student->avatar)) {
+                Storage::disk('public')->delete($student->avatar);
+            }
+            $avatarPath = $request->file('avatar')->store('avatars/students', 'public');
+        }
+
+        DB::transaction(function () use ($validated, $student, $avatarPath) {
             $userUpdates = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -155,13 +172,14 @@ class StudentController extends Controller
             $student->user->update($userUpdates);
 
             $student->update([
-                'classroom_id' => $validated['classroom_id'],
+                'classroom_id' => $validated['classroom_id'] ?? null,
                 'student_code' => $validated['student_code'],
-                'date_of_birth' => $validated['date_of_birth'],
+                'avatar' => $avatarPath,
+                'date_of_birth' => $validated['date_of_birth'] ?? null,
                 'gender' => $validated['gender'],
-                'parent_name' => $validated['parent_name'],
-                'parent_phone' => $validated['parent_phone'],
-                'address' => $validated['address'],
+                'parent_name' => $validated['parent_name'] ?? null,
+                'parent_phone' => $validated['parent_phone'] ?? null,
+                'address' => $validated['address'] ?? null,
             ]);
         });
 
@@ -191,6 +209,10 @@ class StudentController extends Controller
         $code = $student->student_code;
 
         DB::transaction(function () use ($student) {
+            if ($student->avatar && Storage::disk('public')->exists($student->avatar)) {
+                Storage::disk('public')->delete($student->avatar);
+            }
+
             $user = $student->user;
             $student->delete();
             if ($user) {

@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property int $user_id
+ * @property string|null $avatar
  * @property string|null $phone
  * @property string|null $qualification
  * @property string|null $specialization
@@ -23,6 +24,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, TeacherSubject> $teacherSubjects
  * @property-read Collection<int, Subject> $taughtSubjects
  * @property-read Collection<int, Classroom> $taughtClassrooms
+ * @property-read string|null $avatar_url
  */
 class TeacherProfile extends Model
 {
@@ -35,11 +37,20 @@ class TeacherProfile extends Model
      */
     protected $fillable = [
         'user_id',
+        'avatar',
         'phone',
         'qualification',
         'specialization',
         'address',
     ];
+
+    /**
+     * Get the avatar URL or null if not uploaded.
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->avatar ? asset('storage/'.$this->avatar) : null;
+    }
 
     /**
      * Get the user account for this teacher.

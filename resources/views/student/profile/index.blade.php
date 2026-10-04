@@ -515,10 +515,14 @@
                     <div class="relative z-10 pt-5 flex items-center gap-5 sm:gap-6">
                         <!-- Student Photo -->
                         <div class="w-24 h-28 sm:w-28 sm:h-32 rounded-2xl bg-gradient-to-b from-sky-400 to-indigo-600 p-0.5 shadow-lg shrink-0">
-                            <div class="w-full h-full rounded-[14px] bg-slate-900 flex flex-col items-center justify-center text-white border border-white/20">
-                                <span class="text-3xl sm:text-4xl font-black">{{ strtoupper(substr($userName, 0, 2)) }}</span>
-                                <span class="text-[9px] uppercase tracking-wider text-sky-300 mt-1 font-bold">Verified</span>
-                            </div>
+                            @if($student?->avatar_url)
+                                <img src="{{ $student->avatar_url }}" alt="{{ $userName }}" class="w-full h-full rounded-[14px] object-cover border border-white/20">
+                            @else
+                                <div class="w-full h-full rounded-[14px] bg-slate-900 flex flex-col items-center justify-center text-white border border-white/20">
+                                    <span class="text-3xl sm:text-4xl font-black">{{ strtoupper(substr($userName, 0, 2)) }}</span>
+                                    <span class="text-[9px] uppercase tracking-wider text-sky-300 mt-1 font-bold">Verified</span>
+                                </div>
+                            @endif
                         </div>
 
                         <!-- Student Data Fields -->

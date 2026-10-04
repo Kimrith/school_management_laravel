@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
  * @property int $user_id
  * @property int|null $classroom_id
  * @property string $student_code
+ * @property string|null $avatar
  * @property Carbon|null $date_of_birth
  * @property string $gender
  * @property string|null $parent_name
@@ -27,6 +28,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, Attendance> $attendances
  * @property-read Collection<int, Mark> $marks
  * @property-read Collection<int, FeeInvoice> $feeInvoices
+ * @property-read string|null $avatar_url
  */
 class StudentProfile extends Model
 {
@@ -41,6 +43,7 @@ class StudentProfile extends Model
         'user_id',
         'classroom_id',
         'student_code',
+        'avatar',
         'date_of_birth',
         'gender',
         'parent_name',
@@ -66,6 +69,14 @@ class StudentProfile extends Model
     public function getStatusAttribute(): StudentStatus
     {
         return $this->user?->status ?? StudentStatus::Active;
+    }
+
+    /**
+     * Get the avatar URL or null if not uploaded.
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->avatar ? asset('storage/'.$this->avatar) : null;
     }
 
     /**

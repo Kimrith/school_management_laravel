@@ -78,7 +78,7 @@
         
         <!-- Left / Primary Form Column -->
         <div class="flex-1 w-full space-y-6 min-w-0">
-            <form id="edit-teacher-form" action="{{ route('admin.teachers.update', $teacher->id) }}" method="POST" class="space-y-6">
+            <form id="edit-teacher-form" action="{{ route('admin.teachers.update', $teacher->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 @method('PUT')
 
@@ -94,6 +94,55 @@
                                 <p class="text-xs text-slate-400 mt-0.5">Account identity, portal login email, and authentication status</p>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Faculty Avatar Upload Field (formfile) -->
+                    <div x-data="{ avatarPreview: '{{ $teacher->avatar_url }}' }" class="p-4 bg-slate-50/80 rounded-2xl border border-dashed @error('avatar') border-rose-300 ring-2 ring-rose-500/10 @else border-slate-300/80 @enderror">
+                        <label class="block font-semibold text-slate-700 text-xs mb-2">Faculty Photo / Avatar</label>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <!-- Avatar Preview -->
+                            <div class="relative w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+                                <template x-if="avatarPreview">
+                                    <img :src="avatarPreview" alt="Avatar preview" class="w-full h-full object-cover">
+                                </template>
+                                <template x-if="!avatarPreview">
+                                    <div class="w-full h-full bg-gradient-to-tr from-indigo-500 via-indigo-600 to-sky-400 text-white font-bold text-base flex items-center justify-center">
+                                        {{ strtoupper(substr($teacher->user->name ?? 'TC', 0, 2)) }}
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- File input -->
+                            <div class="flex-1 min-w-0">
+                                <input 
+                                    type="file" 
+                                    name="avatar" 
+                                    id="edit_teacher_avatar"
+                                    accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                                    @change="const file = $event.target.files[0]; if (file) { avatarPreview = URL.createObjectURL(file); }"
+                                    class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 file:cursor-pointer cursor-pointer focus:outline-none"
+                                >
+                                <p class="text-[11px] text-slate-400 mt-1">Upload a replacement image (PNG, JPG, WEBP, or GIF up to 2MB). Leave empty to keep existing.</p>
+                            </div>
+
+                            <!-- Clear new selection button -->
+                            <button 
+                                type="button" 
+                                x-show="avatarPreview && avatarPreview !== '{{ $teacher->avatar_url }}'" 
+                                x-cloak
+                                @click="avatarPreview = '{{ $teacher->avatar_url }}'; $el.closest('[x-data]').querySelector('input[type=file]').value = ''"
+                                class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer text-xs flex items-center gap-1 font-semibold"
+                                title="Reset to current avatar"
+                            >
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                <span>Reset</span>
+                            </button>
+                        </div>
+                        @error('avatar')
+                            <p class="text-rose-600 text-[11px] mt-1.5">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -572,9 +621,13 @@
             <!-- Sidebar Card 1: Faculty Identity Badge & Quick Stats -->
             <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-5">
                 <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-sky-400 text-white font-bold text-lg flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/20 border-2 border-white ring-1 ring-slate-100">
-                        {{ strtoupper(substr($teacher->user->name ?? 'TC', 0, 2)) }}
-                    </div>
+                    @if($teacher->avatar_url)
+                        <img src="{{ $teacher->avatar_url }}" alt="{{ $teacher->user->name ?? 'Teacher' }}" class="w-16 h-16 rounded-2xl object-cover shrink-0 shadow-md shadow-indigo-500/20 border-2 border-white ring-1 ring-slate-100">
+                    @else
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-sky-400 text-white font-bold text-lg flex items-center justify-center shrink-0 shadow-md shadow-indigo-500/20 border-2 border-white ring-1 ring-slate-100">
+                            {{ strtoupper(substr($teacher->user->name ?? 'TC', 0, 2)) }}
+                        </div>
+                    @endif
                     <div class="min-w-0 flex-1">
                         <h2 class="text-base font-bold text-slate-900 truncate">{{ $teacher->user->name ?? 'Faculty Member' }}</h2>
                         <p class="text-xs text-slate-400 truncate">{{ $teacher->user->email ?? 'No email' }}</p>

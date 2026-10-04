@@ -107,12 +107,6 @@
                     </button>
 
                     @if($count === 1)
-                        <a 
-                            href="{{ route('teacher.grades.index', ['exam_id' => $firstExam->id, 'classroom_id' => $firstExam->classroom_id]) }}" 
-                            class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline"
-                        >
-                            Marks Sheet &rarr;
-                        </a>
                         <form 
                             action="{{ route('admin.exams.destroy', $firstExam) }}" 
                             method="POST" 
@@ -195,12 +189,6 @@
                                         </td>
                                         <td class="py-2.5 px-4 text-right">
                                             <div class="inline-flex items-center gap-2">
-                                                <a 
-                                                    href="{{ route('teacher.grades.index', ['exam_id' => $item->id, 'classroom_id' => $item->classroom_id]) }}" 
-                                                    class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline"
-                                                >
-                                                    Marks Sheet &rarr;
-                                                </a>
                                                 <form 
                                                     action="{{ route('admin.exams.destroy', $item) }}" 
                                                     method="POST" 

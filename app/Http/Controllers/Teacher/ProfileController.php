@@ -8,6 +8,7 @@ use App\Models\TeacherProfile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
@@ -67,6 +68,7 @@ class ProfileController extends Controller
             'qualification' => ['nullable', 'string', 'max:255'],
             'specialization' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:500'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,gif', 'max:2048'],
         ]);
 
         if ($user) {
@@ -74,9 +76,20 @@ class ProfileController extends Controller
                 'name' => $validated['name'],
             ]);
 
+            $teacher = $user->teacherProfile;
+            $avatarPath = $teacher?->avatar;
+
+            if ($request->hasFile('avatar')) {
+                if ($avatarPath && Storage::disk('public')->exists($avatarPath)) {
+                    Storage::disk('public')->delete($avatarPath);
+                }
+                $avatarPath = $request->file('avatar')->store('avatars/teachers', 'public');
+            }
+
             TeacherProfile::updateOrCreate(
                 ['user_id' => $user->id],
                 [
+                    'avatar' => $avatarPath,
                     'phone' => $validated['phone'] ?? null,
                     'qualification' => $validated['qualification'] ?? null,
                     'specialization' => $validated['specialization'] ?? null,

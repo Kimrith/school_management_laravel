@@ -9,9 +9,13 @@
                             </td>
                             <td class="py-4 px-3">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-100 to-sky-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 border border-indigo-200/60">
-                                        {{ strtoupper(substr($student->user->name ?? 'ST', 0, 2)) }}
-                                    </div>
+                                    @if($student->avatar_url)
+                                        <img src="{{ $student->avatar_url }}" alt="{{ $student->user->name ?? 'Student' }}" class="w-9 h-9 rounded-xl object-cover shrink-0 border border-indigo-200/60 shadow-2xs">
+                                    @else
+                                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-100 to-sky-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 border border-indigo-200/60">
+                                            {{ strtoupper(substr($student->user->name ?? 'ST', 0, 2)) }}
+                                        </div>
+                                    @endif
                                     <div>
                                         <p class="font-bold text-slate-900 leading-snug">{{ $student->user->name ?? 'Unknown' }}</p>
                                         <p class="text-xs text-slate-400">{{ $student->user->email ?? '' }}</p>
@@ -65,18 +69,6 @@
                             </td>
                             <td class="py-4 pl-3 pr-6 text-right">
                                 <div class="inline-flex items-center gap-1.5 justify-end">
-                                    <!-- View Profile -->
-                                    <a 
-                                        href="{{ url('/student/profile') }}" 
-                                        class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" 
-                                        title="View Student Profile"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                        </svg>
-                                    </a>
-
                                     <!-- Edit Student -->
                                     <a 
                                         href="{{ route('admin.students.edit', $student->id) }}" 

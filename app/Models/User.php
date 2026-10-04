@@ -145,4 +145,20 @@ class User extends Authenticatable
             ->where('classroom_id', $classroomId)
             ->exists();
     }
+
+    /**
+     * Get the avatar file path from the associated student or teacher profile.
+     */
+    public function getAvatarAttribute(): ?string
+    {
+        return $this->studentProfile?->avatar ?? $this->teacherProfile?->avatar;
+    }
+
+    /**
+     * Get the avatar URL from the associated student or teacher profile.
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->studentProfile?->avatar_url ?? $this->teacherProfile?->avatar_url;
+    }
 }

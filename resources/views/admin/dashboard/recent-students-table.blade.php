@@ -48,9 +48,13 @@
                         <!-- Student Name & Code -->
                         <td class="py-3.5 pl-6 pr-3">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl {{ $bgColor }} text-white text-xs font-bold flex items-center justify-center shadow-2xs shrink-0">
-                                    {{ $initials }}
-                                </div>
+                                @if($student->avatar_url)
+                                    <img src="{{ $student->avatar_url }}" alt="{{ $name }}" class="w-9 h-9 rounded-xl object-cover shadow-2xs shrink-0 border border-slate-200/80">
+                                @else
+                                    <div class="w-9 h-9 rounded-xl {{ $bgColor }} text-white text-xs font-bold flex items-center justify-center shadow-2xs shrink-0">
+                                        {{ $initials }}
+                                    </div>
+                                @endif
                                 <div class="min-w-0">
                                     <p class="font-semibold text-slate-900 leading-snug">{{ $name }}</p>
                                     <p class="text-xs font-mono text-slate-400">{{ $student->student_code }}</p>

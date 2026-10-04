@@ -30,16 +30,6 @@
                 </svg>
                 <span>Print Score Sheet</span>
             </button>
-
-            <a 
-                href="{{ url('/teacher/grades') }}" 
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-xs transition-colors"
-            >
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                </svg>
-                <span>Teacher Grading Sheet</span>
-            </a>
         </div>
     </div>
 
@@ -337,14 +327,6 @@
                                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                                         </svg>
-                                    </a>
-
-                                    <a 
-                                        href="{{ route('teacher.grades.index', ['classroom_id' => $record->exam?->classroom_id, 'exam_id' => $record->exam_id]) }}"
-                                        class="text-xs font-semibold text-slate-500 hover:text-slate-800 hover:underline"
-                                        title="Audit Grade Sheet"
-                                    >
-                                        Audit Sheet &rarr;
                                     </a>
                                 </div>
                             </td>

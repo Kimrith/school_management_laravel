@@ -101,7 +101,9 @@ class ReportController extends Controller
         $examTitles = Exam::distinct()->orderBy('title')->pluck('title');
         $subjects = Subject::orderBy('name')->get();
 
-        return view('admin.report.index', compact(
+        $viewName = view()->exists('admin.reports.index') ? 'admin.reports.index' : 'admin.report.index';
+
+        return view($viewName, compact(
             'marks',
             'classrooms',
             'examTitles',

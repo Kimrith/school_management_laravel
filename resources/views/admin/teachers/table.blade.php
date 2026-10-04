@@ -7,9 +7,13 @@
             <!-- Instructor Info -->
             <td class="py-4 pl-6 pr-3">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-100 to-sky-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 border border-indigo-200/60 shadow-2xs">
-                        {{ strtoupper(substr($teacher->user->name ?? 'TC', 0, 2)) }}
-                    </div>
+                    @if($teacher->avatar_url)
+                        <img src="{{ $teacher->avatar_url }}" alt="{{ $teacher->user->name ?? 'Teacher' }}" class="w-9 h-9 rounded-xl object-cover shrink-0 border border-indigo-200/60 shadow-2xs">
+                    @else
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-100 to-sky-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0 border border-indigo-200/60 shadow-2xs">
+                            {{ strtoupper(substr($teacher->user->name ?? 'TC', 0, 2)) }}
+                        </div>
+                    @endif
                     <div>
                         <p class="font-bold text-slate-900 leading-snug">{{ $teacher->user->name ?? 'Unknown' }}</p>
                         <p class="text-xs text-slate-400">{{ $teacher->user->email ?? '' }}</p>

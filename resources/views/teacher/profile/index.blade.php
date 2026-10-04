@@ -91,9 +91,13 @@
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
                 <div class="relative group">
                     <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-300 p-0.5 shadow-lg shadow-emerald-950/40">
-                        <div class="w-full h-full bg-slate-900/90 rounded-[14px] flex items-center justify-center text-white font-bold text-3xl font-mono">
-                            {{ strtoupper(substr($facultyName, 0, 2)) }}
-                        </div>
+                        @if($teacher?->avatar_url)
+                            <img src="{{ $teacher->avatar_url }}" alt="{{ $facultyName }}" class="w-full h-full object-cover rounded-[14px]">
+                        @else
+                            <div class="w-full h-full bg-slate-900/90 rounded-[14px] flex items-center justify-center text-white font-bold text-3xl font-mono">
+                                {{ strtoupper(substr($facultyName, 0, 2)) }}
+                            </div>
+                        @endif
                     </div>
                     <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 ring-4 ring-slate-900 flex items-center justify-center" title="Active Faculty">
                         <span class="w-2 h-2 rounded-full bg-white"></span>
@@ -301,9 +305,39 @@
                     </button>
                 </div>
 
-                <form method="POST" action="{{ route('teacher.profile.update') }}" class="p-6 space-y-4">
+                <form method="POST" action="{{ route('teacher.profile.update') }}" enctype="multipart/form-data" class="p-6 space-y-4">
                     @csrf
                     @method('PUT')
+
+                    <!-- Avatar formfile -->
+                    <div x-data="{ avatarPreview: '{{ $teacher?->avatar_url }}' }">
+                        <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Profile Photo / Avatar
+                        </label>
+                        <div class="flex items-center gap-3.5 p-3 rounded-xl border border-dashed border-slate-300 bg-slate-50/50">
+                            <div class="relative w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+                                <template x-if="avatarPreview">
+                                    <img :src="avatarPreview" alt="Avatar preview" class="w-full h-full object-cover">
+                                </template>
+                                <template x-if="!avatarPreview">
+                                    <div class="w-full h-full bg-slate-900 text-white font-mono font-bold text-sm flex items-center justify-center">
+                                        {{ strtoupper(substr($facultyName, 0, 2)) }}
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <input 
+                                    type="file" 
+                                    name="avatar" 
+                                    id="teacher_profile_avatar" 
+                                    accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                                    @change="const file = $event.target.files[0]; if (file) { avatarPreview = URL.createObjectURL(file); }"
+                                    class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 file:cursor-pointer cursor-pointer focus:outline-none"
+                                >
+                                <p class="text-[11px] text-slate-400 mt-0.5">PNG, JPG, WEBP, or GIF (Max 2MB)</p>
+                            </div>
+                        </div>
+                    </div>
 
                     <div>
                         <label for="modal_name" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">

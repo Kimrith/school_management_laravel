@@ -137,9 +137,13 @@
                             </td>
                             <td class="py-4 px-3">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs flex items-center justify-center shrink-0 border border-rose-200/70">
-                                        {{ strtoupper(substr($student->user->name ?? 'ST', 0, 2)) }}
-                                    </div>
+                                    @if($student->avatar_url)
+                                        <img src="{{ $student->avatar_url }}" alt="{{ $student->user->name ?? 'Student' }}" class="w-9 h-9 rounded-xl object-cover shrink-0 border border-rose-200/70 shadow-2xs">
+                                    @else
+                                        <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs flex items-center justify-center shrink-0 border border-rose-200/70">
+                                            {{ strtoupper(substr($student->user->name ?? 'ST', 0, 2)) }}
+                                        </div>
+                                    @endif
                                     <div>
                                         <p class="font-bold text-slate-900 leading-snug">{{ $student->user->name ?? 'Unknown' }}</p>
                                         <p class="text-xs text-slate-400">{{ $student->user->email ?? '' }}</p>

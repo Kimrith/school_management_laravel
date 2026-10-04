@@ -62,7 +62,7 @@
             </div>
 
             <!-- Form Content -->
-            <form action="{{ route('admin.students.store') }}" method="POST" class="p-6 pt-4 space-y-4 text-xs">
+            <form action="{{ route('admin.students.store') }}" method="POST" enctype="multipart/form-data" class="p-6 pt-4 space-y-4 text-xs">
                 @csrf
 
                 <!-- Credentials Info Banner -->
@@ -77,6 +77,56 @@
 
                 <!-- Section: Student Information -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <!-- Student Avatar Upload Field (formfile) -->
+                    <div class="sm:col-span-2" x-data="{ avatarPreview: null }">
+                        <label class="block font-semibold text-slate-700 mb-1.5">Student Photo / Avatar</label>
+                        <div class="flex items-center gap-3.5 p-3 bg-slate-50/80 rounded-2xl border border-dashed @error('avatar') border-rose-300 ring-2 ring-rose-500/10 @else border-slate-300/80 @enderror">
+                            <!-- Preview Box -->
+                            <div class="relative w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+                                <template x-if="avatarPreview">
+                                    <img :src="avatarPreview" alt="Avatar preview" class="w-full h-full object-cover">
+                                </template>
+                                <template x-if="!avatarPreview">
+                                    <div class="flex flex-col items-center justify-center text-indigo-500">
+                                        <svg class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                        </svg>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- FormFile Input & Info -->
+                            <div class="flex-1 min-w-0">
+                                <input 
+                                    type="file" 
+                                    name="avatar" 
+                                    id="student_avatar"
+                                    accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                                    @change="const file = $event.target.files[0]; if (file) { avatarPreview = URL.createObjectURL(file); }"
+                                    class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 file:cursor-pointer cursor-pointer focus:outline-none"
+                                >
+                                <p class="text-[11px] text-slate-400 mt-0.5">PNG, JPG, WEBP, or GIF (Max 2MB)</p>
+                            </div>
+
+                            <!-- Clear Preview Button -->
+                            <button 
+                                type="button" 
+                                x-show="avatarPreview" 
+                                x-cloak
+                                @click="avatarPreview = null; $el.closest('[x-data]').querySelector('input[type=file]').value = ''"
+                                class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                title="Remove photo"
+                            >
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        @error('avatar')
+                            <p class="text-rose-600 text-[11px] mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <!-- Student Full Name -->
                     <div class="sm:col-span-2">
                         <label class="block font-semibold text-slate-700 mb-1">Student Full Name *</label>

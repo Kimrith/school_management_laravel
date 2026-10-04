@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class TeacherController extends Controller
 {
@@ -101,6 +102,7 @@ class TeacherController extends Controller
             'classroom_ids' => 'nullable|array',
             'classroom_ids.*' => 'exists:classrooms,id',
             'address' => 'nullable|string',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:2048',
         ]);
 
         $specialization = null;
@@ -112,7 +114,12 @@ class TeacherController extends Controller
 
         $selectedClassrooms = array_values(array_filter(array_map('intval', (array) ($request->input('classrooms') ?? $request->input('classroom_ids') ?? []))));
 
-        DB::transaction(function () use ($validated, $specialization, $selectedClassrooms) {
+        $avatarPath = null;
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars/teachers', 'public');
+        }
+
+        DB::transaction(function () use ($validated, $specialization, $selectedClassrooms, $avatarPath) {
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -123,6 +130,7 @@ class TeacherController extends Controller
 
             TeacherProfile::create([
                 'user_id' => $user->id,
+                'avatar' => $avatarPath,
                 'phone' => $validated['phone'] ?? null,
                 'qualification' => $validated['qualification'] ?? null,
                 'specialization' => $specialization,
@@ -188,6 +196,7 @@ class TeacherController extends Controller
             'classroom_ids.*' => 'exists:classrooms,id',
             'address' => 'nullable|string',
             'status' => 'nullable|in:active,inactive,suspended',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:2048',
         ]);
 
         $specialization = null;
@@ -199,7 +208,15 @@ class TeacherController extends Controller
 
         $selectedClassrooms = array_values(array_filter(array_map('intval', (array) ($request->input('classrooms') ?? $request->input('classroom_ids') ?? []))));
 
-        DB::transaction(function () use ($validated, $teacher, $specialization, $selectedClassrooms) {
+        $avatarPath = $teacher->avatar;
+        if ($request->hasFile('avatar')) {
+            if ($teacher->avatar && Storage::disk('public')->exists($teacher->avatar)) {
+                Storage::disk('public')->delete($teacher->avatar);
+            }
+            $avatarPath = $request->file('avatar')->store('avatars/teachers', 'public');
+        }
+
+        DB::transaction(function () use ($validated, $teacher, $specialization, $selectedClassrooms, $avatarPath) {
             $userUpdates = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -212,6 +229,7 @@ class TeacherController extends Controller
             $teacher->user->update($userUpdates);
 
             $teacher->update([
+                'avatar' => $avatarPath,
                 'phone' => $validated['phone'] ?? null,
                 'qualification' => $validated['qualification'] ?? null,
                 'specialization' => $specialization,
@@ -283,6 +301,10 @@ class TeacherController extends Controller
         $name = $teacher->user->name ?? 'Faculty member';
 
         DB::transaction(function () use ($teacher) {
+            if ($teacher->avatar && Storage::disk('public')->exists($teacher->avatar)) {
+                Storage::disk('public')->delete($teacher->avatar);
+            }
+
             $user = $teacher->user;
             $teacher->delete();
             if ($user) {
