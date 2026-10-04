@@ -197,4 +197,27 @@ class AvatarManagementTest extends TestCase
         $this->assertStringContainsString('storage/avatars/students/demo.jpg', $studentUser->avatar_url);
         $this->assertEquals('avatars/students/demo.jpg', $studentUser->avatar);
     }
+
+    public function test_storage_route_serves_avatar_file(): void
+    {
+        Storage::disk('public')->put('avatars/students/test_avatar.jpg', 'fake-image-bytes');
+
+        $response = $this->get('/storage/avatars/students/test_avatar.jpg');
+
+        $response->assertOk();
+    }
+
+    public function test_storage_route_returns_404_when_file_does_not_exist(): void
+    {
+        $response = $this->get('/storage/avatars/students/nonexistent.jpg');
+
+        $response->assertNotFound();
+    }
+
+    public function test_storage_route_prevents_directory_traversal(): void
+    {
+        $response = $this->get('/storage/../secret.txt');
+
+        $response->assertNotFound();
+    }
 }
