@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: school_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+    networks:
+      - laravel-net
+
+  web:
+    image: nginx:alpine
+    container_name: school_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - laravel-net
+    depends_on:
+      - app
+
+networks:
+  laravel-net:
+    driver: bridge
